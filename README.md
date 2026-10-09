@@ -41,7 +41,7 @@ Fonts (Bodoni Moda, Instrument Sans) are self-hosted under the SIL Open Font Lic
 ## Links
 
 - **GitHub**: [https://github.com/crlsyajie](https://github.com/crlsyajie)
-- **LinkedIn**: [https://www.linkedin.com/in/carlos-yajie-fetizanan](https://www.linkedin.com/in/carlos-yajie-fetizanan)
+- **LinkedIn**: [https://www.linkedin.com/in/carlos-yajie-fetizanan-b320a1286/](https://www.linkedin.com/in/carlos-yajie-fetizanan-b320a1286/)
 
 ## Local Development
 

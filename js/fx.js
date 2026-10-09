@@ -69,22 +69,28 @@ systemLight.addEventListener('change', (e) => {
   if (!saved) setTheme(e.matches ? 'light' : 'dark', false);
 });
 
-/* ========== RAIL: tucks away while you scroll down ========== */
+/* ========== RAIL: folds away when you're not using it ========== */
+// It shows for a moment on arrival, then folds back leaving only the wax seal.
+// Hovering the seal or the rail, reaching for the left edge, or tabbing in opens it;
+// it folds again shortly after you move away.
 const rail = $('#site-nav');
-if (rail) {
-  let lastScroll = scrollY;
-  const tuck = (hide) => rail.classList.toggle('is-tucked', hide);
-  window.addEventListener('scroll', () => {
-    const y = scrollY, dy = y - lastScroll;
-    if (Math.abs(dy) > 6) {
-      // down hides it, up brings it back; it always shows at the very top
-      tuck(dy > 0 && y > 120 && !rail.contains(document.activeElement));
-      lastScroll = y;
-    }
+if (rail && window.matchMedia('(min-width: 761px)').matches) {
+  let timer = null;
+  const open = () => { clearTimeout(timer); rail.classList.remove('is-tucked'); };
+  const foldSoon = (ms = 1100) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      if (!rail.matches(':hover') && !rail.contains(document.activeElement)) rail.classList.add('is-tucked');
+    }, ms);
+  };
+  rail.addEventListener('pointerenter', open);
+  rail.addEventListener('pointerleave', () => foldSoon());
+  rail.addEventListener('focusin', open);
+  rail.addEventListener('focusout', () => foldSoon());
+  window.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'mouse' && e.clientX < 24 && rail.classList.contains('is-tucked')) { open(); foldSoon(1800); }
   }, { passive: true });
-  // reach for the left edge (or tab into it) and it comes back
-  window.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && e.clientX < 28) tuck(false); }, { passive: true });
-  rail.addEventListener('focusin', () => tuck(false));
+  foldSoon(2600);
 }
 
 /* ========== MENU (phones) ========== */

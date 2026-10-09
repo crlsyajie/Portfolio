@@ -117,8 +117,13 @@ main, .site-foot { position: relative; z-index: 1; }
   .wrap { padding-left: max(var(--gutter), calc(var(--rail) + 1.75rem)); }
   .site-foot { padding-left: calc(var(--rail) + 1.75rem) !important; }
   .site-nav { transition: transform 0.6s var(--ease), box-shadow 0.6s ease; }
-  .site-nav.is-tucked { transform: translateX(-100%); }
+  .site-nav.is-tucked { transform: translateX(-100%); border-right-color: transparent; }
   .site-nav:not(.is-tucked) { box-shadow: 8px 0 30px rgba(40, 25, 10, 0.06); }
+  /* folded away, the seal stays behind in the corner as a handle */
+  .site-nav .seal { transition: transform 0.6s var(--ease), rotate 0.6s var(--ease); }
+  .site-nav.is-tucked .seal { transform: translateX(calc(var(--rail) - 0.6rem)) scale(0.92); box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.14), 0 6px 16px rgba(60, 20, 5, 0.35); }
+  .site-nav.is-tucked nav, .site-nav.is-tucked .rail-tools { opacity: 0; }
+  .site-nav nav, .site-nav .rail-tools { transition: opacity 0.4s ease; }
 }
 
 /* Roman-capital caption above headings */

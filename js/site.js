@@ -299,7 +299,7 @@ const topics = [
   { w: ['python', 'adk', 'agent', 'agents'], k: 1.5,
     r: () => ({ text: 'Python projects:', list: projectList('python'), actions: [{ label: 'Show Python projects', run: () => showWork('python') }] }) },
   { w: ['contact', 'email', 'reach', 'hire', 'phone', 'number', 'call', 'message', 'available', 'freelance', 'commission', 'rate', 'rates', 'price', 'pricing', 'quote', 'cost'], k: 1.4,
-    r: () => ({ text: kbText('Contact') || `You can email Carlos at ${EMAIL}.`, actions: [contactAction, copyAction] }) },
+    r: () => ({ text: kbText('Contact') || `You can email Carlos at ${EMAIL} or call him on +63 956 576 7967.`, actions: [contactAction, copyAction] }) },
   { w: ['instagram', 'facebook', 'linkedin', 'social', 'socials', 'follow', 'ig', 'fb'], k: 1.4,
     r: () => {
       const names = { linkedin: 'LinkedIn', github: 'GitHub', instagram: 'Instagram', facebook: 'Facebook' };

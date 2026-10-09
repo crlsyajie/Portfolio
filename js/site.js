@@ -249,6 +249,15 @@ let kb = null;
 fetch('lib/chatbot/knowledge-base.json').then(r => (r.ok ? r.json() : null)).then(d => { kb = d; }).catch(() => {});
 const kbText = (cat) => (kb ? kb.knowledge_base.filter(k => k.category === cat).map(k => k.content).join(' ') : '');
 
+// What the assistant says about Carlos (from his LinkedIn profile, October 2026).
+const PROFILE = {
+  about: 'Carlos Yajie Fetizanan is a Creative Technologist based in Manila: AI and ML developer, software engineer, UI/UX designer, visual artist and art director. He graduated Cum Laude in Information Technology, majoring in Business Analytics, from Batangas State University in 2026.',
+  now: 'Since June 2026 he has worked full-time as an AI Creative Ops prompt engineer at Tuncarp in Bonifacio Global City (hybrid).',
+  before: 'Before that he interned at Batangas State University (data architecture and statistical analysis, February to May 2026) and managed social media for Tech Executive Labs, Next Enabled and MVP Valley from 2025 to 2026.',
+  education: 'He graduated Cum Laude from Batangas State University with a BS in Information Technology, major in Business Analytics (2022 to 2026). His capstone, BaraKollect, uses computer vision and analytics to study Liberica coffee beans.',
+  hire: 'He is open to work, hybrid or remote, from the Philippines.'
+};
+
 const projectList = (cat) => projects
   .filter(p => !cat || p.dataset.cat === cat)
   .map(p => ({ label: $('.project-title', p).textContent, href: $('a', p).href }));
@@ -276,10 +285,11 @@ const topics = [
   { w: ['thanks', 'thank you', 'salamat', 'ty'], k: 0.5,
     r: () => ({ text: "You're welcome. If you'd like to work with Carlos, the contact form is the quickest way.", actions: [contactAction] }) },
   { w: ['who', 'about', 'carlos', 'yajie', 'yourself', 'background', 'introduce', 'what does he do', 'bio'], k: 1,
-    r: () => ({ text: `${kbText('About')} ${kbText('Summary')}`.trim(), actions: [{ label: 'Go to About', run: () => goTo('about') }] }) },
-  { w: ['intern', 'internship', 'experience', 'job', 'work at', 'currently'], k: 1.2, r: () => ({ text: kbText('About') }) },
-  { w: ['school', 'study', 'studies', 'university', 'college', 'degree', 'education', 'bsu', 'batstate', 'student', 'bsit', 'course'], k: 1.2,
-    r: () => ({ text: kbText('Education') }) },
+    r: () => ({ text: `${PROFILE.about} ${PROFILE.now}`, actions: [{ label: 'Go to About', run: () => goTo('about') }] }) },
+  { w: ['intern', 'internship', 'experience', 'job', 'jobs', 'work at', 'currently', 'tuncarp', 'prompt', 'role', 'company', 'employer', 'working'], k: 1.2,
+    r: () => ({ text: `${PROFILE.now} ${PROFILE.before}`, actions: [{ label: 'See his experience', run: () => goTo('about') }] }) },
+  { w: ['school', 'study', 'studies', 'university', 'college', 'degree', 'education', 'bsu', 'batstate', 'student', 'bsit', 'course', 'cum laude', 'graduate'], k: 1.2,
+    r: () => ({ text: PROFILE.education }) },
   { w: ['cert', 'certs', 'certificate', 'certificates', 'certification', 'certifications', 'certified', 'badge', 'aws', 'datacamp', 'google'], k: 1.3,
     r: () => ({ text: kbText('Certifications'), actions: [{ label: 'Open the library', run: () => openRoom('library') }] }) },
   { w: ['skill', 'skills', 'tool', 'tools', 'software', 'figma', 'photoshop', 'adobe', 'illustrator', 'premiere', 'xd', 'proficient', 'good at'], k: 1.1,
@@ -299,7 +309,7 @@ const topics = [
   { w: ['python', 'adk', 'agent', 'agents'], k: 1.5,
     r: () => ({ text: 'Python projects:', list: projectList('python'), actions: [{ label: 'Show Python projects', run: () => showWork('python') }] }) },
   { w: ['contact', 'email', 'reach', 'hire', 'phone', 'number', 'call', 'message', 'available', 'freelance', 'commission', 'rate', 'rates', 'price', 'pricing', 'quote', 'cost'], k: 1.4,
-    r: () => ({ text: kbText('Contact') || `You can email Carlos at ${EMAIL} or call him on +63 956 576 7967.`, actions: [contactAction, copyAction] }) },
+    r: () => ({ text: `${PROFILE.hire} You can email Carlos at ${EMAIL} or call him on +63 956 576 7967.`, actions: [contactAction, copyAction] }) },
   { w: ['post', 'posts', 'news', 'latest', 'recent', 'event', 'events', 'devfest', 'graduate', 'graduated', 'graduation', 'cum laude', 'activity', 'updates'], k: 1.5,
     r: () => ({ text: 'Carlos pins his recent LinkedIn posts to the wall in the studio: Google I/O Extended Manila 2026, graduating Cum Laude, the BaraKollect showcase and DevFest Manila 2025.', actions: [{ label: 'Show the wall', run: () => openRoom('notes') }] }) },
   { w: ['instagram', 'facebook', 'linkedin', 'social', 'socials', 'follow', 'ig', 'fb'], k: 1.4,
@@ -308,8 +318,8 @@ const topics = [
       const s = (kb && kb.info.socials) || {};
       return { text: 'You can find Carlos here:', list: Object.keys(s).map(k => ({ label: names[k] || k, href: s[k] })) };
     } },
-  { w: ['where', 'location', 'based', 'live', 'lives', 'from', 'batangas', 'philippines'], k: 1,
-    r: () => ({ text: `Carlos is based in ${(kb && kb.info.location) || 'Batangas, PH'}.` }) },
+  { w: ['where', 'location', 'based', 'live', 'lives', 'from', 'batangas', 'manila', 'philippines'], k: 1,
+    r: () => ({ text: 'Carlos is based in Manila, Philippines, and works hybrid in Bonifacio Global City. He grew up and studied in Batangas.' }) },
   { w: ['cv', 'resume'], k: 1.6, r: () => ({ text: "Here's Carlos's CV:", list: [{ label: 'Open CV (PDF)', href: 'assets/resumeee.pdf' }] }) },
   { w: ['leonardo', 'da vinci', 'davinci', 'vinci', 'painting', 'painted', 'canvas', 'easel', 'spin', 'hero', 'opening', 'studio'], k: 1.4,
     r: () => ({ text: "The opening is a live sitting: Leonardo da Vinci paints Carlos's portrait in his Florence workshop, and as you scroll the camera walks a full circle round the studio.",

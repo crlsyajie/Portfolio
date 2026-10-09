@@ -7,7 +7,7 @@ A personal portfolio for an ML developer, front-end developer, UI/UX designer an
 A single-page portfolio in plain HTML, CSS and JavaScript. No build step and no libraries: push to GitHub Pages and it runs.
 
 - **The sitting** (`js/film.js`): the hero is a tall scroll track with a sticky stage. The opening shot hangs tilted beside the headline, comes off the wall to fill the screen, and then the 15-second studio footage plays forward and back with the scroll while notes about Carlos unfold. The footage is stored as frames in `assets/sitting/` (15 fps on desktop (about 13 MB), 10 fps on phones (about 4 MB)), loaded coarse-to-fine so any scroll position has a frame early. See [PROMPTS.md](PROMPTS.md) for how it was made and how to swap it.
-- **Notes during the orbit**: five folded-paper notes (who he is, current internship, craft, certificates, motto) unfold in sync with the camera; their timing is the `data-from` / `data-to` seconds on each `.note` in `index.html`.
+- **Notes during the orbit**: five folded-paper notes (who he is, current role, craft, certificates, motto) unfold in sync with the camera; their timing is the `data-from` / `data-to` seconds on each `.note` in `index.html`.
 - **The close-up** (between Work and About): Leonardo's brush on the portrait, pushed in and out by the scroll. Frames in `assets/closeup/`.
 - **Navigation**: a rail down the left edge with a wax-seal monogram and Roman-numeral folios. It tucks away while you scroll down and comes back when you scroll up or reach for the left edge. On phones it folds into a seal that opens a full-page index.
 - **Type**: Cormorant Garamond and EB Garamond (Renaissance roman), Cinzel (Roman capitals for labels) and Kaushan Script for the brushed words, from Google Fonts.

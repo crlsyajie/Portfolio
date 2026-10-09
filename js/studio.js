@@ -209,15 +209,15 @@ const BOOKS = [
   { title: 'AI & Python', at: [214, 530, 61, 229], spine: 'AI & Python', issuer: 'DataCamp · Certificates', date: '', badge: '', img: '',
     note: 'Python for data work and the foundations of artificial intelligence.',
     skills: ['Python', 'Machine learning'], color: '#3b2a1e', h: 72, w: 2.2 },
-  { title: 'BS Information Technology', at: [792, 621, 211, 54], spine: 'BS Information Technology', issuer: 'Batangas State University · Business Analytics', date: '', badge: '', img: '',
-    note: 'The degree in progress: data, systems and the analytics that tie them together.',
+  { title: 'BS Information Technology', at: [792, 621, 211, 54], spine: 'BS Information Technology', issuer: 'Batangas State University · Business Analytics · Cum Laude', date: '2026-07', badge: '', img: '',
+    note: 'Graduated Cum Laude in July 2026, after four years of data, systems and the analytics that tie them together.',
     skills: ['Business analytics', 'Information systems'], color: '#5b1a2a', h: 98, w: 3.6 }
 ];
 const shelf = $('#shelf');
 const card = $('#book-open');
 const chipsEl = $('#skill-chips');
 let current = -1;
-const when = (ym) => ym ? `Issued ${new Date(`${ym}-01T12:00:00`).toLocaleDateString('en', { month: 'long', year: 'numeric' })}` : '';
+const when = (ym, word = 'Issued') => ym ? `${word} ${new Date(`${ym}-01T12:00:00`).toLocaleDateString('en', { month: 'long', year: 'numeric' })}` : '';
 
 // Each certificate is a real book in the photo: the spine is cut from the same
 // image, so it looks identical until it is lifted out of the shelf.
@@ -271,7 +271,7 @@ function openBook(i) {
   const b = BOOKS[i];
   $('#book-issuer').textContent = b.issuer;
   $('#book-title').textContent = b.title;
-  $('#book-date').textContent = when(b.date);
+  $('#book-date').textContent = when(b.date, b.badge || b.img ? 'Issued' : 'Graduated');
   $('#book-note').textContent = b.note;
   const img = $('#book-badge');
   img.hidden = !b.img;

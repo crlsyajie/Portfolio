@@ -141,9 +141,10 @@
     <!-- ============ THE STUDIO ============
          Leonardo's empty workshop, after the sitting. Every object keeps a memory:
          the canvas on the easel holds the paintings and drawings, the flying machine
-         the code, the bookshelf the certificates, and the window turns day to night.
+         the code, the bookshelf the certificates, the sketches on the wall the latest
+         LinkedIn posts, and the window turns day to night.
          Hotspot positions are percentages of assets/studio/room.jpg. js/studio.js
-         opens each "chamber" (also reachable as #work, #art and #library). -->
+         opens each "chamber" (also reachable as #work, #art, #library and #notes). -->
     <section id="studio" class="studio-scene" aria-labelledby="studio-title">
       <div class="studio-head wrap">
         <div>
@@ -170,6 +171,10 @@
             <span class="hs-pin" aria-hidden="true"></span>
             <span class="hs-label"><b>The bookshelf</b> Certificates &amp; study</span>
           </button>
+          <button type="button" class="hotspot" data-chamber="notes" style="--x: 74.6%; --y: 36.5%; --w: 24%; --h: 27%;">
+            <span class="hs-pin" aria-hidden="true"></span>
+            <span class="hs-label"><b>The wall</b> Notes &amp; recent posts</span>
+          </button>
           <button type="button" class="hotspot hs-window" data-theme-window style="--x: 17.6%; --y: 29%; --w: 9%; --h: 50%;">
             <span class="hs-pin" aria-hidden="true"></span>
             <span class="hs-label"><b>The window</b> <span class="hs-daynight">Let night fall</span></span>
@@ -181,6 +186,7 @@
         <li><button type="button" data-chamber="art"><b>I</b> The canvas <span>Paintings &amp; drawings</span></button></li>
         <li><button type="button" data-chamber="work"><b>II</b> The flying machine <span>Code &amp; repositories</span></button></li>
         <li><button type="button" data-chamber="library"><b>III</b> The bookshelf <span>Certificates &amp; study</span></button></li>
+        <li><button type="button" data-chamber="notes"><b>IV</b> The wall <span>Notes &amp; recent posts</span></button></li>
       </ul>
 
       <!-- ===== Chamber: the canvas → paintings and drawings, stood in a rack ===== -->
@@ -355,6 +361,30 @@
             </div>
             <div class="skill-chips" id="skill-chips" role="group" aria-label="Filter books by skill"></div>
           </div>
+        </div>
+      </div>
+
+      <!-- ===== Chamber: the sketches on the wall → recent LinkedIn posts ===== -->
+      <div class="chamber" id="notes" role="dialog" aria-modal="true" aria-labelledby="notes-title" hidden>
+        <div class="chamber-bar">
+          <button type="button" class="chamber-back" data-close-chamber>← Back to the studio</button>
+          <p class="kicker">The wall</p>
+        </div>
+        <div class="chamber-body wrap">
+          <div class="chamber-head">
+            <h2 id="notes-title" tabindex="-1">Notes on <em>the wall</em></h2>
+            <p>What I've been up to lately, pinned up like studies between paintings: events, projects and milestones, from <a href="https://www.linkedin.com/in/carlos-yajie-fetizanan-b320a1286/recent-activity/all/" target="_blank" rel="noopener">my LinkedIn</a>. Take one down to read it in full.</p>
+          </div>
+          <!-- built by js/studio.js from the POSTS list -->
+          <div class="pinboard" id="pinboard" role="list" aria-label="Recent LinkedIn posts"></div>
+          <article class="letter" id="letter" hidden>
+            <div class="letter-head">
+              <p class="kicker" id="letter-date"></p>
+              <button type="button" class="chamber-back" id="letter-close">Pin it back ↑</button>
+            </div>
+            <div class="letter-frame" id="letter-frame"></div>
+            <a class="btn btn-solid" id="letter-link" target="_blank" rel="noopener">Open on LinkedIn</a>
+          </article>
         </div>
       </div>
     </section>

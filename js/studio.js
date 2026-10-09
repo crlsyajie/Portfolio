@@ -6,6 +6,7 @@
    2. The window turns day into night
    3. The ledger: every repository, read live from GitHub
    4. The library: certificates as books on a shelf
+   5. The wall: recent LinkedIn posts pinned up as studies
    ============================================ */
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
@@ -14,7 +15,7 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 const studio = $('#studio');
 const room = $('#room');
 const roomScroll = $('#room-scroll');
-const CHAMBERS = ['art', 'work', 'library'];
+const CHAMBERS = ['art', 'work', 'library', 'notes'];
 
 /* ========== 1. CHAMBERS ========== */
 let openName = null;
@@ -312,3 +313,80 @@ function chooseSkill(sk) {
   chips.forEach(c => c.setAttribute('aria-pressed', String(c.dataset.skill === sk)));
   books.forEach((b, i) => b.classList.toggle('is-dim', !!sk && !BOOKS[i].skills.includes(sk)));
 }
+
+/* ========== 5. THE WALL ========== */
+// Recent LinkedIn posts, pinned to the wall like studies. LinkedIn doesn't let
+// other sites read a profile's posts, so each one is listed here by hand.
+// To add a post: on LinkedIn choose "…" → "Embed this post", copy the number
+// after "ugcPost:" (or "share:"), and add a line at the top of this list.
+const POSTS = [
+  { urn: 'urn:li:ugcPost:7494583875445149696', date: '2026-08', title: 'Google I/O Extended Manila 2026',
+    line: 'Not as a student anymore, but as a professional: an afternoon of AI talks on spec-driven development and agentic pipelines.',
+    img: 'https://media.licdn.com/dms/image/v2/D5622AQErgcqqb_TT3g/feedshare-image-high-res/B56aAIcL2zHcAU-/0/1786848004381?e=2147483647&v=beta&t=KlleileyoSxeD551IsXRhD43MXCSPTphvERYClIE1fU' },
+  { urn: 'urn:li:ugcPost:7487818208859541504', date: '2026-07', title: 'Graduated Cum Laude',
+    line: 'BS Information Technology, major in Business Analytics, Batangas State University. Four years of data and front-end work. Ready to work.',
+    img: 'https://media.licdn.com/dms/image/v2/D5622AQH-DfU1V5-FpQ/feedshare-image-high-res/B56Z.oS93jJoAU-/0/1785234972743?e=2147483647&v=beta&t=eSJUZ2gEEabfXwQqJkzeAvNkNXsLjFdPbLCSFwn3p8Q' },
+  { urn: 'urn:li:ugcPost:7402128030942625792', date: '2025-12', title: 'BaraKollect, a featured showcase',
+    line: 'Our capstone uses computer vision and analytics to study Liberica coffee beans, showcased at the campus’s 25th founding anniversary.',
+    img: 'https://media.licdn.com/dms/image/v2/D5622AQHP-OV_0mZ0Jg/feedshare-image-high-res/B56ZrmkNCaL0Ao-/0/1764804846029?e=2147483647&v=beta&t=y2dNdcVspD584qgbSIpxLLjf4R7tOWOr1DiFSw59xc4' },
+  { urn: 'urn:li:ugcPost:7395736182250364928', date: '2025-11', title: 'DevFest Manila 2025',
+    line: 'A day of AI and Cloud with Google Developer Groups Manila: Gemini embeddings in ADK, multi-agent systems and the Gemini CLI.',
+    img: 'https://media.licdn.com/dms/image/v2/D5622AQFcgsSOdK80kQ/feedshare-image-high-res/B56ZqLu0dfG4Ao-/0/1763280908456?e=2147483647&v=beta&t=85kulof6q7iEuUIv4zhr9bQTQ_JCn1HXtpgMmyRSgZc' }
+];
+const TILTS = [-2.4, 1.8, -1.2, 2.6, -1.8, 1.2];
+const pinboard = $('#pinboard');
+const letter = $('#letter');
+const letterFrame = $('#letter-frame');
+const monthYear = (ym) => new Date(`${ym}-01T12:00:00`).toLocaleDateString('en', { month: 'long', year: 'numeric' });
+let openPost = -1;
+
+const pinned = POSTS.map((post, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'study';
+  b.setAttribute('role', 'listitem');
+  b.setAttribute('aria-label', `${post.title}, ${monthYear(post.date)}. Read the post`);
+  b.style.setProperty('--tilt', `${TILTS[i % TILTS.length]}deg`);
+  const pic = el('span', 'study-pic');
+  const img = el('img');
+  img.src = post.img;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.referrerPolicy = 'no-referrer';
+  img.addEventListener('error', () => pic.classList.add('is-missing'), { once: true });
+  pic.append(img);
+  b.append(pic, el('span', 'study-date', monthYear(post.date)), el('span', 'study-title', post.title), el('span', 'study-line', post.line));
+  b.addEventListener('click', () => readPost(i));
+  pinboard.append(b);
+  return b;
+});
+
+// The real post, embedded from LinkedIn, only loads once it is taken down.
+function readPost(i) {
+  if (openPost === i) { closeLetter(); return; }
+  openPost = i;
+  const post = POSTS[i];
+  pinned.forEach((b, k) => b.classList.toggle('is-taken', k === i));
+  $('#letter-date').textContent = `${monthYear(post.date)} · ${post.title}`;
+  letterFrame.textContent = '';
+  const frame = document.createElement('iframe');
+  frame.src = `https://www.linkedin.com/embed/feed/update/${post.urn}?collapsed=1`;
+  frame.title = `LinkedIn post: ${post.title}`;
+  frame.allowFullscreen = true;
+  letterFrame.append(frame);
+  $('#letter-link').href = `https://www.linkedin.com/feed/update/${post.urn}/`;
+  letter.hidden = false;
+  letter.classList.remove('is-in');
+  void letter.offsetWidth;
+  letter.classList.add('is-in');
+  letter.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+}
+function closeLetter() {
+  const was = openPost;
+  openPost = -1;
+  pinned.forEach(b => b.classList.remove('is-taken'));
+  letter.hidden = true;
+  letterFrame.textContent = '';
+  if (was >= 0) pinned[was].focus({ preventScroll: false });
+}
+$('#letter-close').addEventListener('click', closeLetter);

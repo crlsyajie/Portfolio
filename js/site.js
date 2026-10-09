@@ -300,6 +300,8 @@ const topics = [
     r: () => ({ text: 'Python projects:', list: projectList('python'), actions: [{ label: 'Show Python projects', run: () => showWork('python') }] }) },
   { w: ['contact', 'email', 'reach', 'hire', 'phone', 'number', 'call', 'message', 'available', 'freelance', 'commission', 'rate', 'rates', 'price', 'pricing', 'quote', 'cost'], k: 1.4,
     r: () => ({ text: kbText('Contact') || `You can email Carlos at ${EMAIL} or call him on +63 956 576 7967.`, actions: [contactAction, copyAction] }) },
+  { w: ['post', 'posts', 'news', 'latest', 'recent', 'event', 'events', 'devfest', 'graduate', 'graduated', 'graduation', 'cum laude', 'activity', 'updates'], k: 1.5,
+    r: () => ({ text: 'Carlos pins his recent LinkedIn posts to the wall in the studio: Google I/O Extended Manila 2026, graduating Cum Laude, the BaraKollect showcase and DevFest Manila 2025.', actions: [{ label: 'Show the wall', run: () => openRoom('notes') }] }) },
   { w: ['instagram', 'facebook', 'linkedin', 'social', 'socials', 'follow', 'ig', 'fb'], k: 1.4,
     r: () => {
       const names = { linkedin: 'LinkedIn', github: 'GitHub', instagram: 'Instagram', facebook: 'Facebook' };

@@ -6,7 +6,6 @@
    4. Hover letters and rolling links
    5. Custom cursor
    6. Magnetic buttons
-   7. Hero parallax
    8. Marquee
    9. Project spotlight, meter counters
    Runs on its own, so it still works if the 3D form can't load.
@@ -31,7 +30,7 @@ const systemLight = window.matchMedia('(prefers-color-scheme: light)');
 function setTheme(t, save) {
   root.setAttribute('data-theme', t);
   toggle.setAttribute('aria-label', t === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
-  if (themeMeta) themeMeta.setAttribute('content', t === 'light' ? '#f3ede3' : '#0e0d0c');
+  if (themeMeta) themeMeta.setAttribute('content', t === 'light' ? '#f3ece1' : '#15110d');
   if (save) { try { localStorage.setItem('theme', t); } catch (_) { /* private mode */ } }
   document.dispatchEvent(new CustomEvent('themechange', { detail: t }));
 }
@@ -70,6 +69,39 @@ systemLight.addEventListener('change', (e) => {
   if (!saved) setTheme(e.matches ? 'light' : 'dark', false);
 });
 
+/* ========== RAIL: tucks away while you scroll down ========== */
+const rail = $('#site-nav');
+if (rail) {
+  let lastScroll = scrollY;
+  const tuck = (hide) => rail.classList.toggle('is-tucked', hide);
+  window.addEventListener('scroll', () => {
+    const y = scrollY, dy = y - lastScroll;
+    if (Math.abs(dy) > 6) {
+      // down hides it, up brings it back; it always shows at the very top
+      tuck(dy > 0 && y > 120 && !rail.contains(document.activeElement));
+      lastScroll = y;
+    }
+  }, { passive: true });
+  // reach for the left edge (or tab into it) and it comes back
+  window.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' && e.clientX < 28) tuck(false); }, { passive: true });
+  rail.addEventListener('focusin', () => tuck(false));
+}
+
+/* ========== MENU (phones) ========== */
+const navEl = $('#site-nav');
+const seal = $('#menu-seal');
+if (navEl && seal) {
+  const setMenu = (open) => {
+    navEl.classList.toggle('is-open', open);
+    seal.setAttribute('aria-expanded', String(open));
+    seal.setAttribute('aria-label', open ? 'Close the index' : 'Open the index');
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+  seal.addEventListener('click', () => setMenu(!navEl.classList.contains('is-open')));
+  $$('nav a', navEl).forEach(a => a.addEventListener('click', () => setMenu(false)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && navEl.classList.contains('is-open')) { setMenu(false); seal.focus(); } });
+}
+
 /* ========== 2. PROGRESS ========== */
 const toTop = $('#to-top');
 function updateProgress() {
@@ -80,18 +112,23 @@ function updateProgress() {
 }
 toTop.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
-  $('.brand').focus({ preventScroll: true });
+  $('.seal').focus({ preventScroll: true });
 });
 
 /* ========== 3. REVEALS ========== */
 // Split big headings into words that rise in.
 function splitWords(el) {
-  const words = el.textContent.trim().split(/\s+/);
+  // keep <em> words (the brushed ones) as <em> so they keep their lettering
+  const words = [];
+  el.childNodes.forEach(n => {
+    const brushed = n.nodeType === 1 && n.tagName === 'EM';
+    n.textContent.trim().split(/\s+/).filter(Boolean).forEach(w => words.push({ w, brushed }));
+  });
   el.textContent = '';
-  words.forEach((w, i) => {
+  words.forEach(({ w, brushed }, i) => {
     const outer = document.createElement('span');
     outer.className = 'w';
-    const inner = document.createElement('span');
+    const inner = document.createElement(brushed ? 'em' : 'span');
     inner.textContent = w;
     inner.style.setProperty('--wi', i);
     outer.appendChild(inner);
@@ -100,20 +137,29 @@ function splitWords(el) {
   });
   el.classList.add('words');
 }
-$$('.section-head h2, .about-body > h2').forEach(splitWords);
+$$('.section-head h2, .about-body > h2, .contact-body > h2').forEach(splitWords);
+
+// a brush stroke that paints itself under each heading as it comes into view
+$$('.section-head h2, .about-body > h2, .contact-body > h2').forEach(h => {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'brush-line');
+  svg.setAttribute('viewBox', '0 0 300 24');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.innerHTML = '<path pathLength="1" d="M4 15 C 60 6, 120 18, 180 10 S 270 8, 296 12" />';
+  h.after(svg);
+});
 
 const revealGroups = [
-  ['.section-head h2, .about-body > h2', null],
+  ['.section-head h2, .about-body > h2, .contact-body > h2', null],
+  ['.brush-line', 0],
   ['.section-head p', 120],
   ['.filters button', 50],
   ['.project', 60],
   ['.projects-more', 0],
-  ['.ring-stage', 'scale'],
-  ['.ring-controls', 0],
   ['.about-lead', 100],
   ['.about-grid > div', 140],
   ['.about-grid h3, .plain-list li, .meters li', 40],
-  ['.contact-title', 0],
   ['.contact-lead', 120],
   ['.contact-form > *', 70],
   ['.socials li', 60]
@@ -162,7 +208,7 @@ function splitChars(el) {
     if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
   });
 }
-$$('.hero-title .line > span').forEach(splitChars);
+$$('.hero-title .line > span').forEach(el => { if (!el.querySelector('em')) splitChars(el); });
 $$('[data-hover-chars]').forEach(el => {
   el.setAttribute('aria-label', el.textContent.trim());
   const wrap = document.createElement('span');
@@ -173,7 +219,7 @@ $$('[data-hover-chars]').forEach(el => {
   splitChars(wrap);
 });
 
-$$('.site-nav nav a, .socials a').forEach(a => {
+$$('.socials a').forEach(a => {
   const t = a.textContent.trim();
   a.innerHTML = '';
   const roll = document.createElement('span');
@@ -217,8 +263,8 @@ if (finePointer && !reduceMotion) {
     const text = t.closest('input:not([type="radio"]), textarea');
     root.classList.toggle('cursor-text', !!text);
     let tag = '';
-    if (t.closest('.ring-item')) tag = 'View';
-    else if (t.closest('.ring-stage')) tag = 'Drag';
+    if (t.closest('.rack-canvas')) tag = 'View';
+    else if (t.closest('.hotspot')) tag = 'Enter';
     else if (t.closest('.project a')) tag = 'Open';
     const link = !tag && t.closest('a, button, label, [role="button"], .marquee-item');
     label.textContent = tag;
@@ -236,7 +282,7 @@ if (finePointer && !reduceMotion) {
 
 /* ========== 6. MAGNETIC BUTTONS ========== */
 if (finePointer && !reduceMotion) {
-  $$('.btn, .nav-ask, .theme-toggle, .reshape, .ring-controls .round-btn, .to-top, .chip-btn').forEach(el => {
+  $$('.btn, .theme-toggle, .to-top, .chip-btn').forEach(el => {
     el.classList.add('magnetic');
     const pull = el.classList.contains('btn') ? 0.3 : 0.4;
     el.addEventListener('pointermove', (e) => {
@@ -249,28 +295,6 @@ if (finePointer && !reduceMotion) {
       el.style.setProperty('--fy', `${e.clientY - r.top}px`);
     });
     el.addEventListener('pointerleave', () => { el.style.transform = ''; });
-  });
-}
-
-/* ========== 7. HERO PARALLAX ========== */
-const hero = $('.hero');
-const portraitImg = $('.hero-portrait img');
-function updateHero() {
-  if (reduceMotion || innerWidth <= 760) return;
-  const y = Math.min(scrollY, innerHeight);
-  root.style.setProperty('--hero-shift', `${(y * 0.28).toFixed(1)}px`);
-  root.style.setProperty('--hero-fade', (1 - Math.min(1, y / (innerHeight * 0.6))).toFixed(3));
-}
-if (finePointer && !reduceMotion && hero && portraitImg) {
-  hero.addEventListener('pointermove', (e) => {
-    const nx = e.clientX / innerWidth - 0.5;
-    const ny = e.clientY / innerHeight - 0.5;
-    portraitImg.style.setProperty('--px', `${(-nx * 18).toFixed(1)}px`);
-    portraitImg.style.setProperty('--py', `${(-ny * 10).toFixed(1)}px`);
-  });
-  hero.addEventListener('pointerleave', () => {
-    portraitImg.style.setProperty('--px', '0px');
-    portraitImg.style.setProperty('--py', '0px');
   });
 }
 
@@ -345,9 +369,8 @@ window.addEventListener('scroll', () => {
   lastY = scrollY;
   if (!ticking) {
     ticking = true;
-    requestAnimationFrame(() => { updateProgress(); updateHero(); ticking = false; });
+    requestAnimationFrame(() => { updateProgress(); ticking = false; });
   }
 }, { passive: true });
 window.addEventListener('resize', updateProgress);
 updateProgress();
-updateHero();

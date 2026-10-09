@@ -1,14 +1,13 @@
 /* ============================================
    Site behaviour
-   1. The form + scroll choreography + reshape control
+   1. Scroll hook (the opening scene lives in js/studio.js)
    2. Nav state
    3. Project filters
-   4. Art ring + lightbox
+   4. Art: the canvas rack + lightbox
    5. Tool meters
    6. Contact form
    7. Ask about Carlos
    ============================================ */
-import { createOrb, SHAPES } from './orb.js';
 
 const root = document.documentElement;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -24,93 +23,13 @@ const asset = (path) => (window.__ASSETS && window.__ASSETS[path]) || path;
 
 setTimeout(() => root.classList.remove('intro'), 2600);
 
-/* ========== 1. THE FORM ========== */
-let orb = null;
-try {
-  orb = createOrb($('#orb'), { reduceMotion });
-} catch (err) {
-  console.warn('3D form unavailable:', err);
-}
-if (orb) {
-  root.classList.remove('no-webgl');
-  orb.setTheme(root.dataset.theme === 'light');
-  document.addEventListener('themechange', (e) => orb.setTheme(e.detail === 'light'));
-}
-
-const orbSections = $$('[data-orb]');
-
-function stateFor(section) {
-  const raw = (isMobile() && section.dataset.orbMobile) || section.dataset.orb;
-  const [x, y, s, amp, shape = 0] = raw.split(/\s+/).map(Number);
-  const state = { x, y, s, amp, shape };
-  const anchorSel = section.dataset.orbAnchor;
-  if (anchorSel) {
-    const el = $(anchorSel, section);
-    if (el) {
-      const [ax, ay] = (section.dataset.orbAnchorAt || '0.5 0.5').split(/\s+/).map(Number);
-      const r = el.getBoundingClientRect();
-      state.x = (r.left + r.width * ax) / window.innerWidth - 0.5;
-      state.y = 0.5 - (r.top + r.height * ay) / window.innerHeight;
-    }
-  }
-  return state;
-}
-
-const lerp = (a, b, t) => a + (b - a) * t;
-const smooth = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t); };
-
-function updateOrb() {
-  if (!orb || !orbSections.length) return;
-  const line = window.innerHeight * 0.5;
-  let i = orbSections.findIndex(s => {
-    const r = s.getBoundingClientRect();
-    return r.top <= line && r.bottom > line;
-  });
-  if (i === -1) {
-    // Between sections (e.g. over the marquee): use the last one that started above the line.
-    i = 0;
-    orbSections.forEach((s, k) => { if (s.getBoundingClientRect().top <= line) i = k; });
-  }
-  const sec = orbSections[i];
-  const r = sec.getBoundingClientRect();
-  const p = (line - r.top) / r.height;
-  const a = stateFor(sec);
-  const next = orbSections[i + 1];
-  const blendFrom = Math.max(0.4, 1 - (window.innerHeight * 0.55) / r.height);
-  const t = next ? smooth(blendFrom, 1, p) : 0;
-  const b = next ? stateFor(next) : a;
-  // Shrink while crossing the page so the form doesn't sweep over text at full size.
-  const travel = Math.min(1, Math.abs(b.x - a.x) * 1.6);
-  const dip = 1 - 0.6 * Math.sin(Math.PI * t) * travel;
-  orb.setTarget({
-    x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), s: lerp(a.s, b.s, t) * dip, amp: lerp(a.amp, b.amp, t),
-    shape: t < 0.5 ? a.shape : b.shape
-  });
-}
-
-// Reshape control: a visible, keyboard-friendly way to do what clicking the form does.
-const reshapeBtn = $('#reshape');
-const shapeName = $('#shape-name');
-const marks = $$('.reshape-marks i');
-function showShape(i) {
-  shapeName.textContent = SHAPES[i];
-  marks.forEach((m, k) => m.classList.toggle('is-on', k === i));
-  reshapeBtn.setAttribute('aria-label', `Reshape the form. Current shape: ${SHAPES[i]}`);
-}
-if (orb) {
-  reshapeBtn.hidden = false;
-  showShape(0);
-  orb.onShapeChange(showShape);
-  reshapeBtn.addEventListener('click', () => orb.nextShape());
-}
-
+/* ========== 1. SCROLL ========== */
+// The opening scene itself is driven by js/studio.js.
 let tick = false;
 window.addEventListener('scroll', () => {
-  if (!tick) { tick = true; requestAnimationFrame(() => { updateOrb(); updateNav(); tick = false; }); }
+  if (!tick) { tick = true; requestAnimationFrame(() => { updateNav(); tick = false; }); }
 }, { passive: true });
-window.addEventListener('resize', () => { updateOrb(); updateNav(); });
-const portraitImg = $('.hero-portrait img');
-if (portraitImg && !portraitImg.complete) portraitImg.addEventListener('load', updateOrb, { once: true });
+window.addEventListener('resize', () => updateNav());
 
 /* ========== 2. NAV ========== */
 const nav = $('.site-nav');
@@ -160,10 +79,9 @@ function applyFilter(f) {
   list.classList.remove('is-filtered');
   void list.offsetWidth;
   list.classList.add('is-filtered');
-  updateOrb();
 }
 
-/* ========== 4. ART RING ========== */
+/* ========== 4. ART: THE CANVAS RACK ========== */
 // To add a piece: put a 640px .webp and a 1400px "-large" .webp in assets/art and add a line here.
 const ART = [
   { src: 'art-01', alt: 'Graphite portrait of a woman with long hair' },
@@ -179,155 +97,46 @@ const ART = [
   { src: 'art-11', alt: 'Graphite portrait in a sketchbook next to an iced drink' }
 ];
 
-const stage = $('#ring-stage');
-const ring = $('#ring');
-const countEl = $('#ring-count');
+// The rack: canvases stand side by side on two shelves, the way finished work
+// waited in a Florentine workshop. Each leans a little and has its own size.
+// Hover pulls a canvas up out of the rack; select it to see it up close.
+const STAND = [
+  { h: 100, lean: -2.5 }, { h: 82, lean: 1.5 }, { h: 92, lean: -1 }, { h: 74, lean: 2.5 },
+  { h: 96, lean: -1.8 }, { h: 86, lean: 1.2 }, { h: 78, lean: -2.2 }, { h: 100, lean: 0.8 },
+  { h: 88, lean: -1.4 }, { h: 80, lean: 2 }, { h: 94, lean: -0.6 }
+];
+const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX'];
+const rack = $('#rack');
 const N = ART.length;
-const step = (Math.PI * 2) / N;
-let angle = 0;
-let targetAngle = 0;
-let radius = 400;
-let ringRaf = null;
-
-ART.forEach((a, i) => {
+const perRow = Math.ceil(N / 2);
+const rows = [0, 1].map(() => {
+  const row = document.createElement('div');
+  row.className = 'rack-row';
+  rack.appendChild(row);
+  return row;
+});
+const pieces = ART.map((a, i) => {
+  const st = STAND[i % STAND.length];
   const b = document.createElement('button');
   b.type = 'button';
-  b.className = 'ring-item';
-  b.dataset.index = i;
+  b.className = 'rack-canvas';
+  b.setAttribute('role', 'listitem');
   b.setAttribute('aria-label', `View: ${a.alt}`);
-  b.tabIndex = -1;
+  b.style.setProperty('--h', `${st.h}%`);
+  b.style.setProperty('--lean', `${st.lean}deg`);
   const img = document.createElement('img');
   img.src = asset(`assets/art/${a.src}.webp`);
   img.alt = '';
   img.loading = 'lazy';
   img.decoding = 'async';
-  img.draggable = false;
-  b.appendChild(img);
-  ring.appendChild(b);
+  const label = document.createElement('span');
+  label.className = 'rack-label';
+  label.textContent = `No. ${ROMAN[i] || i + 1}`;
+  b.append(img, label);
+  b.addEventListener('click', () => openLightbox(i));
+  rows[i < perRow ? 0 : 1].appendChild(b);
+  return b;
 });
-const items = $$('.ring-item', ring);
-
-function measureRing() {
-  const card = items[0].getBoundingClientRect().width || 200;
-  radius = (card * 1.18) / (2 * Math.tan(Math.PI / N));
-}
-const frontIndex = () => ((Math.round(-targetAngle / step) % N) + N) % N;
-const facing = (i) => Math.cos(i * step + angle);
-
-function drawRing() {
-  ring.style.transform = `translateZ(${-radius}px) rotateY(${angle}rad)`;
-  items.forEach((el, i) => {
-    el.style.transform = `rotateY(${i * step}rad) translateZ(${radius}px)`;
-    const light = 0.22 + 0.78 * ((facing(i) + 1) / 2);
-    el.style.filter = `brightness(${light.toFixed(3)})`;
-  });
-  const f = frontIndex();
-  items.forEach((el, i) => { el.tabIndex = i === f ? 0 : -1; });
-  countEl.textContent = `${f + 1} of ${N}`;
-}
-
-let dragging = null;
-let velocity = 0;
-
-function animateRing() {
-  if (!dragging) {
-    if (Math.abs(velocity) > 0.0005) {
-      targetAngle += velocity;
-      velocity *= 0.93;
-      if (Math.abs(velocity) <= 0.0005) targetAngle = Math.round(targetAngle / step) * step;
-    }
-    angle += (targetAngle - angle) * (reduceMotion ? 1 : 0.1);
-  }
-  drawRing();
-  if (dragging || Math.abs(targetAngle - angle) > 0.0005 || Math.abs(velocity) > 0.0005) {
-    ringRaf = requestAnimationFrame(animateRing);
-  } else {
-    angle = targetAngle; drawRing(); ringRaf = null;
-  }
-}
-const kickRing = () => { if (!ringRaf) ringRaf = requestAnimationFrame(animateRing); };
-
-function turn(dir) {
-  velocity = 0;
-  targetAngle = (Math.round(targetAngle / step) - dir) * step;
-  kickRing();
-}
-
-$('#ring-prev').addEventListener('click', () => turn(-1));
-$('#ring-next').addEventListener('click', () => turn(1));
-stage.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowRight') { e.preventDefault(); turn(1); }
-  else if (e.key === 'ArrowLeft') { e.preventDefault(); turn(-1); }
-  else if ((e.key === 'Enter' || e.key === ' ') && e.target === stage) { e.preventDefault(); openLightbox(frontIndex()); }
-});
-
-let suppressClick = false;
-stage.addEventListener('pointerdown', (e) => {
-  if (e.button !== 0) return;
-  dragging = { x: e.clientX, y: e.clientY, last: e.clientX, active: false, id: e.pointerId };
-  velocity = 0;
-});
-stage.addEventListener('pointermove', (e) => {
-  if (!dragging || e.pointerId !== dragging.id) return;
-  const dx = e.clientX - dragging.x;
-  if (!dragging.active) {
-    if (Math.abs(dx) < 6 || Math.abs(dx) < Math.abs(e.clientY - dragging.y)) return;
-    dragging.active = true;
-    stage.setPointerCapture(e.pointerId);
-    stage.classList.add('is-dragging');
-    kickRing();
-  }
-  const delta = (e.clientX - dragging.last) / (radius * 1.1);
-  dragging.last = e.clientX;
-  angle += delta;
-  targetAngle = angle;
-  velocity = delta;
-});
-function endRingDrag(e) {
-  if (!dragging || (e && e.pointerId !== dragging.id)) return;
-  const wasActive = dragging.active;
-  dragging = null;
-  stage.classList.remove('is-dragging');
-  if (wasActive) {
-    suppressClick = true;
-    setTimeout(() => { suppressClick = false; }, 60);
-    if (Math.abs(velocity) < 0.002) targetAngle = Math.round(targetAngle / step) * step;
-    kickRing();
-  }
-}
-stage.addEventListener('pointerup', endRingDrag);
-stage.addEventListener('pointercancel', endRingDrag);
-
-// Pieces sit behind the stage's own plane in 3D, so the stage can catch the click.
-// Look underneath it for the front-most piece at that point.
-function itemAt(e) {
-  const direct = e.target.closest && e.target.closest('.ring-item');
-  if (direct) return direct;
-  if (e.clientX === 0 && e.clientY === 0) return null;
-  const hits = document.elementsFromPoint(e.clientX, e.clientY)
-    .map(el => el.closest && el.closest('.ring-item')).filter(Boolean);
-  if (!hits.length) return null;
-  return hits.sort((a, b) => facing(+b.dataset.index) - facing(+a.dataset.index))[0];
-}
-
-stage.addEventListener('click', (e) => {
-  if (suppressClick) { e.preventDefault(); return; }
-  const item = itemAt(e);
-  if (!item || facing(+item.dataset.index) < 0) return;
-  const i = Number(item.dataset.index);
-  if (i === frontIndex()) {
-    openLightbox(i);
-  } else {
-    velocity = 0;
-    const target = -i * step;
-    targetAngle = target + Math.round((targetAngle - target) / (Math.PI * 2)) * Math.PI * 2;
-    kickRing();
-  }
-});
-
-measureRing();
-drawRing();
-window.addEventListener('resize', () => { measureRing(); drawRing(); });
 
 // Lightbox
 const lightbox = $('#lightbox');
@@ -348,12 +157,7 @@ function openLightbox(i) {
   $('#lb-close').focus();
 }
 function closeLightbox() { lightbox.close ? lightbox.close() : lightbox.removeAttribute('open'); }
-lightbox.addEventListener('close', () => {
-  velocity = 0;
-  targetAngle = -lbIndex * step + Math.round((targetAngle + lbIndex * step) / (Math.PI * 2)) * Math.PI * 2;
-  kickRing();
-  stage.focus({ preventScroll: true });
-});
+lightbox.addEventListener('close', () => pieces[lbIndex].focus({ preventScroll: true }));
 $('#lb-prev').addEventListener('click', () => showLb(lbIndex - 1));
 $('#lb-next').addEventListener('click', () => showLb(lbIndex + 1));
 $('#lb-close').addEventListener('click', closeLightbox);
@@ -456,7 +260,13 @@ function goTo(id, after) {
   el.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
   if (after) setTimeout(after, reduceMotion ? 0 : 700);
 }
-const showWork = (cat) => goTo('work', () => applyFilter(cat || 'all'));
+// Work, art and certificates live in the studio's chambers.
+const openRoom = (name, after) => {
+  if (isMobile()) closeAsk(false);
+  if (window.openChamber) window.openChamber(name);
+  if (after) setTimeout(after, reduceMotion ? 50 : 800);
+};
+const showWork = (cat) => openRoom('work', () => applyFilter(cat || 'all'));
 const contactAction = { label: 'Open the contact form', run: () => goTo('contact', () => f.name.focus({ preventScroll: true })) };
 const copyAction = { label: 'Copy email', run: async (b) => { b.textContent = (await copyText(EMAIL)) ? 'Copied' : 'Copy failed'; } };
 
@@ -471,13 +281,13 @@ const topics = [
   { w: ['school', 'study', 'studies', 'university', 'college', 'degree', 'education', 'bsu', 'batstate', 'student', 'bsit', 'course'], k: 1.2,
     r: () => ({ text: kbText('Education') }) },
   { w: ['cert', 'certs', 'certificate', 'certificates', 'certification', 'certifications', 'certified', 'badge', 'aws', 'datacamp', 'google'], k: 1.3,
-    r: () => ({ text: kbText('Certifications'), actions: [{ label: 'See them on the page', run: () => goTo('about') }] }) },
+    r: () => ({ text: kbText('Certifications'), actions: [{ label: 'Open the library', run: () => openRoom('library') }] }) },
   { w: ['skill', 'skills', 'tool', 'tools', 'software', 'figma', 'photoshop', 'adobe', 'illustrator', 'premiere', 'xd', 'proficient', 'good at'], k: 1.1,
     r: () => ({ text: kbText('Skills'), actions: [{ label: 'See his tools', run: () => goTo('about') }] }) },
   { w: ['service', 'services', 'offer', 'help with', 'hire for', 'video', 'editing', 'graphic', 'branding', 'logo'], k: 1.1,
     r: () => ({ text: kbText('Services'), actions: [contactAction] }) },
   { w: ['art', 'draw', 'drawing', 'drawings', 'sketch', 'sketches', 'paint', 'painting', 'portrait', 'portraits', 'graphite', 'artist'], k: 1.5,
-    r: () => ({ text: 'Carlos draws, mostly graphite portraits, and paints now and then. There are 11 pieces in the art ring.', actions: [{ label: 'Show the art', run: () => goTo('art', () => stage.focus({ preventScroll: true })) }] }) },
+    r: () => ({ text: 'Carlos draws, mostly graphite portraits, and paints now and then. They stand in the canvas rack in the studio.', actions: [{ label: 'Show the art', run: () => openRoom('art') }] }) },
   { w: ['project', 'projects', 'portfolio', 'built', 'made', 'work', 'works', 'github', 'repo', 'repos'], k: 1,
     r: () => ({ text: "Here's what's in Carlos's portfolio:", list: projectList(), actions: [{ label: 'Open the work list', run: () => showWork('all') }] }) },
   { w: ['machine learning', 'ml', 'ai', 'model', 'models', 'cnn', 'llm', 'llms', 'deep learning', 'neural', 'data science', 'classification'], k: 1.6,
@@ -499,9 +309,9 @@ const topics = [
   { w: ['where', 'location', 'based', 'live', 'lives', 'from', 'batangas', 'philippines'], k: 1,
     r: () => ({ text: `Carlos is based in ${(kb && kb.info.location) || 'Batangas, PH'}.` }) },
   { w: ['cv', 'resume'], k: 1.6, r: () => ({ text: "Here's Carlos's CV:", list: [{ label: 'Open CV (PDF)', href: 'assets/resumeee.pdf' }] }) },
-  { w: ['orb', 'ball', 'sphere', 'blob', 'shape', 'shapes', 'form', 'orange', 'gold', '3d', 'three', 'cube', 'gem'], k: 1.2,
-    r: () => ({ text: `The amber form is drawn live with three.js and a custom shader. It has five shapes (${SHAPES.join(', ').toLowerCase()}) and changes shape in each section. Click it, or use the Reshape button in the hero, to cycle through them.`,
-      actions: orb ? [{ label: 'Reshape it now', run: () => orb.nextShape() }] : [] }) }
+  { w: ['leonardo', 'da vinci', 'davinci', 'vinci', 'painting', 'painted', 'canvas', 'easel', 'spin', 'hero', 'opening', 'studio'], k: 1.4,
+    r: () => ({ text: "The opening is a live sitting: Leonardo da Vinci paints Carlos's portrait in his Florence workshop, and as you scroll the camera walks a full circle round the studio.",
+      actions: [{ label: 'Watch it again', run: () => window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' }) }] }) }
 ];
 
 const norm = (s) => ' ' + s.toLowerCase().replace(/[^a-z0-9/\s]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
@@ -597,4 +407,3 @@ document.addEventListener('keydown', (e) => {
 });
 
 updateNav();
-updateOrb();

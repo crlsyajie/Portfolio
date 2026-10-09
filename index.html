@@ -4,19 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Carlos Yajie Fetizanan, ML developer and UI/UX designer</title>
-  <meta name="description" content="Portfolio of Carlos Yajie Fetizanan: machine learning, front-end development, UI/UX design, video editing and drawing. Based in Batangas, Philippines." />
-  <meta name="theme-color" content="#0e0d0c" />
+  <meta name="description" content="Portfolio of Carlos Yajie Fetizanan, painted live by Leonardo: machine learning, front-end development, UI/UX design, video editing and drawing. Based in Batangas, Philippines." />
+  <meta name="theme-color" content="#f3ece1" />
   <meta property="og:title" content="Carlos Yajie Fetizanan, Portfolio" />
   <meta property="og:description" content="Pressure is a privilege. ML developer, front-end developer, UI/UX designer and visual artist from Batangas, PH." />
   <meta property="og:image" content="assets/portrait-cutout.webp" />
   <link rel="icon" href="assets/413176132_1490694741788327_6171468843337700105_n.jpg" />
 
-  <link rel="preload" href="assets/fonts/bodoni-moda-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="assets/portrait-cutout.webp" as="image" />
+  <link rel="preload" href="assets/sitting/stills/opening.jpg" as="image" />
+  <!-- Cormorant Garamond and EB Garamond (Renaissance roman), Cinzel (Roman inscriptions), Kaushan Script (brush) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Kaushan+Script&display=swap" />
   <link rel="stylesheet" href="css/site.css" />
   <script>
-    // Start the entrance, and show the flat stand-in until the 3D form is ready.
-    document.documentElement.classList.add('intro', 'no-webgl');
+    // Start the entrance.
+    document.documentElement.classList.add('intro');
     // Pick the theme before first paint: saved choice, else the system setting.
     (function () {
       var t = null;
@@ -24,7 +27,7 @@
       if (t !== 'light' && t !== 'dark') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', t);
       var m = document.querySelector('meta[name="theme-color"]');
-      if (m) m.setAttribute('content', t === 'light' ? '#f3ede3' : '#0e0d0c');
+      if (m) m.setAttribute('content', t === 'light' ? '#f3ece1' : '#15110d');
     })();
   </script>
 </head>
@@ -34,22 +37,23 @@
 
   <div class="progress-bar" aria-hidden="true"></div>
 
-  <!-- The 3D form renders here, behind everything -->
-  <canvas id="orb" aria-hidden="true"></canvas>
-
-  <header class="site-nav">
-    <a class="brand" href="#top" aria-label="Carlos Yajie, back to top">
-      <span class="brand-full">Carlos Yajie</span><span class="brand-short">CY</span>
-    </a>
+  
+  <!-- Navigation runs down the left edge like the spine of a sketchbook.
+       On phones it folds into a wax seal that opens a full-page index. -->
+  <header class="site-nav" id="site-nav">
+    <a class="seal" href="#top" aria-label="Carlos Yajie, back to top"><span>CY</span></a>
+    <button type="button" class="menu-seal" id="menu-seal" aria-label="Open the index" aria-expanded="false" aria-controls="site-nav">
+      <span>CY</span><i aria-hidden="true"></i>
+    </button>
     <nav aria-label="Sections">
       <ul>
-        <li><a href="#work">Work</a></li>
-        <li><a href="#art">Art</a></li>
-        <li><a href="#about">About</a></li>
-        <li><a href="#contact">Contact</a></li>
+        <li><a href="#studio"><b>I</b><span>Studio</span></a></li>
+        <li><a href="#about"><b>II</b><span>About</span></a></li>
+        <li><a href="#contact"><b>III</b><span>Contact</span></a></li>
       </ul>
     </nav>
-    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme" title="Toggle theme (T)">
+    <div class="rail-tools">
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Switch to light theme" title="Toggle theme (T)">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <mask id="tt-mask"><rect x="-6" y="-6" width="36" height="36" fill="#fff" /><circle class="tt-cut" cx="17" cy="7" r="5.5" fill="#000" /></mask>
         <circle class="tt-core" cx="12" cy="12" r="5" fill="currentColor" mask="url(#tt-mask)" />
@@ -61,84 +65,158 @@
         </g>
       </svg>
     </button>
-    <button type="button" class="nav-ask" data-open-ask aria-label="Ask about Carlos" aria-controls="ask" aria-expanded="false">
-      <span aria-hidden="true" class="nav-ask-dot"></span><span class="nav-ask-label">Ask about me</span>
-    </button>
+      <button type="button" class="nav-ask" data-open-ask aria-label="Ask about Carlos" aria-controls="ask" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 3c-6 1-11 6-13 12l-2 6 6-2c6-2 11-7 12-13" /><path d="M7 15l3 3" /></svg>
+        <span class="nav-ask-label">Ask about me</span>
+      </button>
+    </div>
   </header>
 
   <main>
-    <!-- data-orb = "x y size wobble shape" for while this section is on screen.
-         x and y run from -0.5 (left/bottom) to 0.5 (right/top).
-         shape: 0 sphere, 1 twisted cube, 2 gem, 3 bloom, 4 hourglass. -->
-
-    <!-- ============ HERO ============ -->
-    <section id="top" class="hero" data-orb="0.16 0 1 0.05 0" data-orb-mobile="0 -0.14 0.95 0.05 0" data-orb-anchor=".hero-portrait" data-orb-anchor-at="0.5 0.4">
-      <div class="hero-copy">
-        <p class="hero-hello">Carlos Yajie Fetizanan</p>
-        <h1 class="hero-title" aria-label="Pressure is a privilege.">
-          <span class="line" aria-hidden="true"><span>Pressure</span></span>
-          <span class="line" aria-hidden="true"><span>is a</span></span>
-          <span class="line" aria-hidden="true"><span>privilege.</span></span>
-        </h1>
-        <p class="hero-sub">
-          I build machine learning models and design the interfaces people use them through.
-          Currently interning at the Center for Artificial Intelligence and Smart Technologies, Batangas State University.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-solid" href="#work">See my work</a>
-          <a class="btn btn-ghost" href="assets/resumeee.pdf" target="_blank" rel="noopener">Download CV</a>
+    <!-- ============ THE SITTING ============
+         A tall scroll track with a sticky stage. js/film.js draws the studio footage
+         (assets/sitting/) frame by frame as you scroll: the tilted still grows to fill the
+         screen, then the camera walks a full circle round the workshop and comes back.
+         To swap the footage: swift tools/make-frames.swift <video> -->
+    <section id="top" class="sitting" aria-label="Introduction">
+      <div class="stage" id="stage">
+        <div class="film" id="film" aria-hidden="true">
+          <img class="film-poster" src="assets/sitting/stills/opening.jpg" alt="" />
+          <canvas id="film-canvas"></canvas>
+          <div class="film-shade"></div>
         </div>
-      </div>
 
-      <figure class="hero-portrait">
-        <img src="assets/portrait-cutout.webp" alt="Carlos Yajie Fetizanan in a black suit, looking up" width="705" height="993" />
-      </figure>
+        <div class="hero-copy">
+          <p class="kicker">Carlos Yajie Fetizanan <span>Batangas · Philippines</span></p>
+          <h1 class="hero-title" aria-label="Pressure is a privilege.">
+            <span class="line" aria-hidden="true"><span>Pressure is</span></span>
+            <span class="line" aria-hidden="true"><span>a <em>privilege.</em></span></span>
+          </h1>
+          <p class="hero-sub">
+            I build machine learning models and design the interfaces people use them through.
+            Currently interning at the Center for Artificial Intelligence and Smart Technologies, Batangas State University.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-solid" href="#studio">Enter the studio</a>
+            <a class="btn btn-ghost" href="assets/resumeee.pdf" target="_blank" rel="noopener">Download CV</a>
+          </div>
+        </div>
 
-      <div class="hero-foot">
-        <ul class="hero-roles" aria-label="Roles">
-          <li>ML developer</li>
-          <li>Front-end developer</li>
-          <li>UI/UX designer</li>
-          <li>Visual artist</li>
-        </ul>
-        <button type="button" class="reshape" id="reshape" hidden>
-          <span class="reshape-marks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
-          <span class="reshape-text">Reshape the form</span>
-          <span class="reshape-name" id="shape-name" aria-live="polite">Sphere</span>
-        </button>
+        <p class="plaque" aria-hidden="true"><em>The Sitting</em> · Leonardo da Vinci paints Carlos Yajie, 2026</p>
+
+        <!-- notes about Carlos that unfold as the camera walks round (times are seconds of footage) -->
+        <div class="notes" aria-hidden="true">
+          <article class="note n1" data-from="0.6" data-to="3.4">
+            <h3><b>I</b> The sitter</h3>
+            <p>Carlos Yajie Fetizanan, a student of Information Technology, majoring in Business Analytics, at Batangas State University.</p>
+          </article>
+          <article class="note n2" data-from="3.5" data-to="6.3">
+            <h3><b>II</b> Present commission</h3>
+            <p>Intern at the Center for Artificial Intelligence and Smart Technologies, Batangas State University.</p>
+          </article>
+          <article class="note n3" data-from="6.4" data-to="9.2">
+            <h3><b>III</b> The craft</h3>
+            <p>Machine learning · Data science · UI/UX design · Front-end development · Drawing and painting</p>
+          </article>
+          <article class="note n4" data-from="9.3" data-to="12.1">
+            <h3><b>IV</b> Seals and letters</h3>
+            <p>Google UX Design · Google Cybersecurity · Google AI Essentials · AWS Cloud Quest: Cloud Practitioner</p>
+          </article>
+          <article class="note n5" data-from="12.2" data-to="15.1">
+            <h3><b>V</b> His motto</h3>
+            <p class="motto">Pressure is a privilege.</p>
+          </article>
+        </div>
+
+        <div class="orbit" aria-hidden="true">
+          <svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" /><circle class="orbit-dot" cx="22" cy="4" r="3" /></svg>
+          <span id="orbit-deg">0°</span>
+        </div>
+        <p class="scroll-cue" aria-hidden="true"><i></i>Scroll to walk round the studio</p>
+        <div class="handoff" aria-hidden="true"></div>
       </div>
     </section>
 
-    <!-- Ticker between hero and work: speeds up and reverses with your scrolling -->
-    <div class="marquee" aria-hidden="true">
-      <div class="marquee-track">
-        <div class="marquee-group">
-          <span class="marquee-item">Machine learning</span><span class="marquee-star">✦</span>
-          <span class="marquee-item">Interface design</span><span class="marquee-star">✦</span>
-          <span class="marquee-item">Front-end</span><span class="marquee-star">✦</span>
-          <span class="marquee-item">Graphite portraits</span><span class="marquee-star">✦</span>
-          <span class="marquee-item">Pressure is a privilege</span><span class="marquee-star">✦</span>
+
+    <!-- ============ THE STUDIO ============
+         Leonardo's empty workshop, after the sitting. Every object keeps a memory:
+         the canvas on the easel holds the paintings and drawings, the flying machine
+         the code, the bookshelf the certificates, and the window turns day to night.
+         Hotspot positions are percentages of assets/studio/room.jpg. js/studio.js
+         opens each "chamber" (also reachable as #work, #art and #library). -->
+    <section id="studio" class="studio-scene" aria-labelledby="studio-title">
+      <div class="studio-head wrap">
+        <div>
+          <p class="kicker">Folio I · Memory lane</p>
+          <h2 id="studio-title">Walk round <em>the studio</em></h2>
+        </div>
+        <p>The sitting is over and the room is quiet. Every object here keeps a memory of the work. Select one to step inside it.</p>
+      </div>
+
+      <div class="room-scroll" id="room-scroll">
+        <div class="room" id="room">
+          <img class="room-img" src="assets/studio/room.jpg" alt="Leonardo's empty workshop: an easel with a blank canvas, a flying-machine model hanging from the beams, a bookshelf, and an arched window" width="1376" height="768" />
+          <div class="room-glow" aria-hidden="true"></div>
+
+          <button type="button" class="hotspot" data-chamber="art" style="--x: 40.4%; --y: 44%; --w: 17%; --h: 44%;">
+            <span class="hs-pin" aria-hidden="true"></span>
+            <span class="hs-label"><b>The canvas</b> Paintings &amp; drawings</span>
+          </button>
+          <button type="button" class="hotspot" data-chamber="work" style="--x: 69.8%; --y: 10%; --w: 22%; --h: 17%;">
+            <span class="hs-pin" aria-hidden="true"></span>
+            <span class="hs-label"><b>The flying machine</b> Code &amp; repositories</span>
+          </button>
+          <button type="button" class="hotspot" data-chamber="library" style="--x: 73.5%; --y: 67%; --w: 28%; --h: 34%;">
+            <span class="hs-pin" aria-hidden="true"></span>
+            <span class="hs-label"><b>The bookshelf</b> Certificates &amp; study</span>
+          </button>
+          <button type="button" class="hotspot hs-window" data-theme-window style="--x: 17.6%; --y: 29%; --w: 9%; --h: 50%;">
+            <span class="hs-pin" aria-hidden="true"></span>
+            <span class="hs-label"><b>The window</b> <span class="hs-daynight">Let night fall</span></span>
+          </button>
         </div>
       </div>
-    </div>
 
-    <!-- ============ WORK ============ -->
-    <section id="work" class="section work" data-orb="0.5 -0.3 0.36 0.06 1" data-orb-mobile="0.5 0.4 0.24 0.06 1">
-      <div class="section-head">
-        <h2>Selected work</h2>
-        <p>Code and design from my GitHub. Pick a category to narrow the list.</p>
+      <ul class="room-legend wrap" aria-label="In the studio">
+        <li><button type="button" data-chamber="art"><b>I</b> The canvas <span>Paintings &amp; drawings</span></button></li>
+        <li><button type="button" data-chamber="work"><b>II</b> The flying machine <span>Code &amp; repositories</span></button></li>
+        <li><button type="button" data-chamber="library"><b>III</b> The bookshelf <span>Certificates &amp; study</span></button></li>
+      </ul>
+
+      <!-- ===== Chamber: the canvas → paintings and drawings, stood in a rack ===== -->
+      <div class="chamber" id="art" role="dialog" aria-modal="true" aria-labelledby="art-title" hidden>
+        <div class="chamber-bar">
+          <button type="button" class="chamber-back" data-close-chamber>← Back to the studio</button>
+          <p class="kicker">The canvas</p>
+        </div>
+        <div class="chamber-body wrap">
+          <div class="chamber-head">
+            <h2 id="art-title" tabindex="-1">Drawings &amp; <em>paintings</em></h2>
+            <p>Away from the screen I draw, mostly portraits in graphite. They stand in the rack the way finished canvases waited in a Florentine workshop. Pull one out to see it up close.</p>
+          </div>
+          <!-- filled in by js/site.js from the ART list -->
+          <div class="rack" id="rack" role="list" aria-label="Artwork"></div>
+        </div>
       </div>
 
-      <div class="filters" role="group" aria-label="Filter projects">
-        <button type="button" data-filter="all" aria-pressed="true">All</button>
-        <button type="button" data-filter="web" aria-pressed="false">Web</button>
-        <button type="button" data-filter="ml" aria-pressed="false">Machine learning</button>
-        <button type="button" data-filter="uiux" aria-pressed="false">UI/UX</button>
-        <button type="button" data-filter="python" aria-pressed="false">Python</button>
-      </div>
-
-      <!-- To add a project, copy one <li> and change the link, title, text and data-cat
-           (web, ml, uiux or python). -->
+      <!-- ===== Chamber: the flying machine → code and repositories ===== -->
+      <div class="chamber" id="work" role="dialog" aria-modal="true" aria-labelledby="work-title" hidden>
+        <div class="chamber-bar">
+          <button type="button" class="chamber-back" data-close-chamber>← Back to the studio</button>
+          <p class="kicker">The flying machine</p>
+        </div>
+        <div class="chamber-body wrap">
+          <div class="chamber-head">
+            <h2 id="work-title" tabindex="-1">Selected <em>work</em></h2>
+            <p>Inventions, the modern kind. A few chosen projects first, then the full ledger, read live from my GitHub.</p>
+          </div>
+          <div class="filters" role="group" aria-label="Filter projects">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="web" aria-pressed="false">Web</button>
+            <button type="button" data-filter="ml" aria-pressed="false">Machine learning</button>
+            <button type="button" data-filter="uiux" aria-pressed="false">UI/UX</button>
+            <button type="button" data-filter="python" aria-pressed="false">Python</button>
+          </div>
       <ul class="projects" id="projects">
         <li class="project" data-cat="web">
           <a href="https://github.com/crlsyajie/eventms" target="_blank" rel="noopener">
@@ -229,39 +307,63 @@
           </a>
         </li>
       </ul>
-      <p class="projects-more"><a href="https://github.com/crlsyajie?tab=repositories" target="_blank" rel="noopener">See every repository on GitHub</a></p>
+      
+          <div class="ledger">
+            <div class="ledger-head">
+              <h3>The ledger · every repository</h3>
+              <a href="https://github.com/crlsyajie?tab=repositories" target="_blank" rel="noopener">Open on GitHub ↗</a>
+            </div>
+            <!-- filled in by js/studio.js from the GitHub API -->
+            <ol class="repos" id="repos" aria-live="polite"><li class="repos-wait">Reading the ledger…</li></ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Chamber: the bookshelf → certificates and study ===== -->
+      <div class="chamber" id="library" role="dialog" aria-modal="true" aria-labelledby="library-title" hidden>
+        <div class="chamber-bar">
+          <button type="button" class="chamber-back" data-close-chamber>← Back to the studio</button>
+          <p class="kicker">The bookshelf</p>
+        </div>
+        <div class="chamber-body wrap">
+          <div class="chamber-head">
+            <h2 id="library-title" tabindex="-1">The <em>library</em></h2>
+            <p>Every certificate is a book I finished. Take one from the shelf to read its cover.</p>
+          </div>
+          <!-- books are built by js/studio.js from the BOOKS list -->
+          <div class="shelf" id="shelf" role="list" aria-label="Certificates"></div>
+          <article class="book-open" id="book-open" aria-live="polite" hidden>
+            <p class="kicker" id="book-issuer"></p>
+            <h3 id="book-title"></h3>
+            <p id="book-note"></p>
+            <a id="book-link" class="btn btn-solid" target="_blank" rel="noopener">See the credential</a>
+          </article>
+        </div>
+      </div>
     </section>
 
-    <!-- ============ ART ============ -->
-    <section id="art" class="section art" data-orb="-0.47 0.3 0.26 0.06 3" data-orb-mobile="-0.5 0.4 0.22 0.06 3">
-      <div class="section-head">
-        <h2>Drawings and paintings</h2>
-        <p>Away from the screen I draw, mostly portraits in graphite. Drag the ring to turn it, and select a piece to see it larger.</p>
-      </div>
-
-      <div class="ring-stage" id="ring-stage" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Artwork ring. Use the left and right arrow keys to turn it.">
-        <div class="ring" id="ring"><!-- filled in by js/site.js from the ART list --></div>
-      </div>
-      <div class="ring-controls">
-        <button type="button" class="round-btn" id="ring-prev" aria-label="Turn to previous piece">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18 9 12l6-6" /></svg>
-        </button>
-        <p class="ring-count" id="ring-count" aria-live="polite"></p>
-        <button type="button" class="round-btn" id="ring-next" aria-label="Turn to next piece">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
-        </button>
+    <!-- ============ INTERLUDE: the close-up ============
+         The camera pushes in on the portrait and pulls back, scrubbed by scroll.
+         Frames in assets/closeup/ (cut from the first studio video, 11.5–14.6 s). -->
+    <section class="closeup" id="closeup" aria-label="Interlude: the portrait, close up">
+      <div class="closeup-stage">
+        <canvas id="closeup-canvas" aria-hidden="true"></canvas>
+        <div class="closeup-shade" aria-hidden="true"></div>
+        <p class="closeup-line"><span>Every stroke,</span> <em>under pressure.</em></p>
+        <p class="closeup-note" aria-hidden="true">Detail · the portrait, still wet</p>
       </div>
     </section>
 
     <!-- ============ ABOUT ============ -->
-    <section id="about" class="section about" data-orb="-0.27 0 0.6 0.04 2" data-orb-mobile="0.5 0.4 0.24 0.04 2">
-      <div class="about-body">
-        <h2>About</h2>
-        <p class="about-lead">
-          I'm Yajie, an IT student at Batangas State University majoring in Business Analytics.
-          I like finding the pattern hiding in a messy dataset, then designing something clear enough that anyone can act on it.
-        </p>
-
+    <section id="about" class="scene dark about">
+      <div class="wrap">
+        <div class="about-body">
+          <p class="kicker">Folio II</p>
+          <h2>About <em>me</em></h2>
+          <p class="about-lead">
+            I'm Yajie, an IT student at Batangas State University majoring in Business Analytics.
+            I like finding the pattern hiding in a messy dataset, then designing something clear enough that anyone can act on it.
+          </p>
         <div class="about-grid">
           <div>
             <h3>What I do</h3>
@@ -285,30 +387,31 @@
               <li style="--v: 60"><span>Illustrator</span><span class="meter" role="img" aria-label="60 percent"></span></li>
             </ul>
 
-            <h3>Education and certificates</h3>
-            <ul class="plain-list creds">
-              <li>BS Information Technology, Batangas State University Lipa</li>
-              <li><a href="https://www.credly.com/badges/4646ab32-93f6-4e9b-aec2-082ee7ca97f1/linked_in_profile" target="_blank" rel="noopener">Google UX Design Professional Certificate</a></li>
-              <li><a href="https://www.credly.com/badges/2d889fbc-6101-448f-81fd-5053852d9369/linked_in_profile" target="_blank" rel="noopener">Google Cybersecurity Professional Certificate</a></li>
-              <li><a href="https://www.credly.com/badges/96740747-ee59-4fc2-96a9-10ee2e97a837/linked_in_profile" target="_blank" rel="noopener">Google AI Essentials</a></li>
-              <li><a href="https://www.credly.com/badges/88216cc1-18e0-422f-af1e-65e814673299/linked_in_profile" target="_blank" rel="noopener">AWS Cloud Quest: Cloud Practitioner</a></li>
-              <li>DataCamp AI and Python certificates</li>
+            <h3>Education</h3>
+            <ul class="plain-list">
+              <li>BS Information Technology, major in Business Analytics, Batangas State University</li>
             </ul>
+            <p class="to-library">Certificates are on the bookshelf. <button type="button" class="link-btn" data-chamber="library">Visit the library</button></p>
           </div>
+        </div>
+
         </div>
       </div>
     </section>
 
-    <!-- ============ CONTACT ============ -->
-    <section id="contact" class="section contact" data-orb="0.33 0 0.78 0.06 4" data-orb-mobile="0.5 0.42 0.3 0.06 4">
-      <div class="contact-body">
-        <h2 class="contact-title" data-hover-chars>Let's make something.</h2>
-        <p class="contact-lead">Tell me about the project and I'll get back to you. Prefer email? Write to
-          <a href="mailto:cyfetizanan@gmail.com">cyfetizanan@gmail.com</a>
-          <button type="button" class="chip-btn" id="copy-email" data-email="cyfetizanan@gmail.com">Copy</button>
-        </p>
 
-        <form id="contact-form" class="contact-form" novalidate>
+    <!-- ============ CONTACT ============ -->
+    <section id="contact" class="scene dark contact">
+      <div class="contact-bg" aria-hidden="true"><img src="assets/sitting/stills/far-wall.jpg" alt="" loading="lazy" /></div>
+      <div class="wrap">
+        <div class="contact-body">
+          <p class="kicker">Folio III</p>
+          <h2 class="contact-title">Let's make <em>something.</em></h2>
+          <p class="contact-lead">Tell me about the project and I'll get back to you. Prefer email? Write to
+            <a href="mailto:cyfetizanan@gmail.com">cyfetizanan@gmail.com</a>
+            <button type="button" class="chip-btn" id="copy-email" data-email="cyfetizanan@gmail.com">Copy</button>
+          </p>
+          <form id="contact-form" class="contact-form" novalidate>
           <div class="field">
             <label for="cf-name">Name</label>
             <input id="cf-name" name="name" type="text" autocomplete="name" required />
@@ -354,6 +457,7 @@
           <li><a href="https://www.instagram.com/crls_brook/" target="_blank" rel="noopener">Instagram</a></li>
           <li><a href="https://www.facebook.com/share/18nwGKjCYv/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a></li>
         </ul>
+        </div>
       </div>
     </section>
   </main>
@@ -398,6 +502,8 @@
   </div>
 
   <script type="module" src="js/fx.js"></script>
+  <script type="module" src="js/film.js"></script>
+  <script type="module" src="js/studio.js"></script>
   <script type="module" src="js/site.js"></script>
 </body>
 </html>

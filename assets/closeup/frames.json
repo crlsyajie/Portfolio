@@ -1,0 +1,11 @@
+{
+  "desktop" : {
+    "fps" : 15,
+    "frames" : 46
+  },
+  "duration" : 3.0999999999999996,
+  "mobile" : {
+    "fps" : 10,
+    "frames" : 30
+  }
+}

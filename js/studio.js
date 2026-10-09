@@ -170,49 +170,145 @@ async function loadLedger() {
 $('#work').addEventListener('chamber:open', loadLedger);
 
 /* ========== 4. THE LIBRARY ========== */
-// To add a certificate, add a book here. h = spine height (%), w = thickness (rem).
+// Certificates as books on the real bookshelf (assets/studio/bookshelf.jpg),
+// each sealed with its Credly badge. `at` is the spine's x, y, width, height in the photo.
+// Source: https://www.credly.com/users/carlos-yajie-fetizanan (badges.json).
+// To add one: copy a book, set its badge id and image path from Credly, pick a
+// spine in the photo for `at`, and list its skills (shared names group in the index).
+const CREDLY = 'https://www.credly.com';
+const badgeImg = (path) => `https://images.credly.com/size/340x340/images/${path}`;
 const BOOKS = [
-  { title: 'Google UX Design', issuer: 'Google · Professional Certificate', note: 'User research, wireframes, prototypes and usability testing, from first sketch to finished Figma file.', href: 'https://www.credly.com/badges/4646ab32-93f6-4e9b-aec2-082ee7ca97f1/linked_in_profile', color: '#7a2318', h: 92, w: 3.2 },
-  { title: 'Google Cybersecurity', issuer: 'Google · Professional Certificate', note: 'Security frameworks, networks, Linux, SQL and Python for keeping systems safe.', href: 'https://www.credly.com/badges/2d889fbc-6101-448f-81fd-5053852d9369/linked_in_profile', color: '#23402e', h: 86, w: 3 },
-  { title: 'Google AI Essentials', issuer: 'Google', note: 'Using generative AI tools well: prompting, responsible use and everyday productivity.', href: 'https://www.credly.com/badges/96740747-ee59-4fc2-96a9-10ee2e97a837/linked_in_profile', color: '#1f2f4f', h: 78, w: 2.4 },
-  { title: 'AWS Cloud Quest', issuer: 'Amazon Web Services · Cloud Practitioner', note: 'Hands-on cloud fundamentals: compute, storage, networking and security on AWS.', href: 'https://www.credly.com/badges/88216cc1-18e0-422f-af1e-65e814673299/linked_in_profile', color: '#8a5a1c', h: 88, w: 2.8 },
-  { title: 'AI & Python', issuer: 'DataCamp · Certificates', note: 'Python for data work and the foundations of artificial intelligence.', href: '', color: '#3b2a1e', h: 74, w: 2.2 },
-  { title: 'BS Information Technology', issuer: 'Batangas State University · Business Analytics', note: 'The degree in progress: data, systems and the analytics that tie them together.', href: '', color: '#5b1a2a', h: 96, w: 3.6 }
+  { title: 'Google UX Design', at: [601, 224, 68, 237], spine: 'Google UX Design', issuer: 'Google · Coursera', date: '2025-04', badge: '4646ab32-93f6-4e9b-aec2-082ee7ca97f1', img: '78d71457-7637-4b02-8c0d-739814070bce/GCC_badge_UX_1000x1000.png',
+    note: 'The end-to-end design process: research, sketching and wireframes through to tested, high-fidelity prototypes.',
+    skills: ['UX design', 'UX research', 'Usability studies', 'Wireframing', 'Prototyping', 'Sketching & ideating', 'Figma', 'Adobe XD'], color: '#7a2318', h: 94, w: 3.2 },
+  { title: 'Google Cybersecurity', at: [101, 217, 54, 244], spine: 'Google Cybersecurity', issuer: 'Google · Coursera', date: '2025-04', badge: '2d889fbc-6101-448f-81fd-5053852d9369', img: '0bf0f2da-a699-4c82-82e2-56dcf1f2e1c7/image.png',
+    note: 'Foundational security practice: frameworks, networks, Linux, SQL and Python for detecting and answering threats.',
+    skills: ['Network security', 'Information security', 'Threat analysis', 'Risk assessment', 'Vulnerability assessment', 'Intrusion detection', 'SIEM tools', 'NIST framework', 'Authentication', 'Linux', 'SQL', 'Python'], color: '#23402e', h: 88, w: 3.4 },
+  { title: 'Google AI Essentials', at: [434, 265, 46, 196], spine: 'Google AI Essentials', issuer: 'Google · Coursera', date: '2024-12', badge: '96740747-ee59-4fc2-96a9-10ee2e97a837', img: 'ea3eec65-ddad-4242-9c59-1defac0fa2d9/image.png',
+    note: 'Bringing AI into everyday work: prompting well, judging AI tools, and using them responsibly.',
+    skills: ['Generative AI', 'Prompt engineering', 'Responsible AI', 'Evaluating AI tools', 'Critical thinking', 'Problem solving'], color: '#1f2f4f', h: 80, w: 2.6 },
+  { title: 'AWS Cloud Quest: Cloud Practitioner', at: [1239, 233, 55, 228], spine: 'AWS Cloud Quest', issuer: 'Amazon Web Services', date: '2025-08', badge: '88216cc1-18e0-422f-af1e-65e814673299', img: '30816e43-2550-4e1c-be22-3f03c5573bb9/blob',
+    note: 'Hands-on cloud fundamentals: building basic solutions with AWS services and the core concepts behind them.',
+    skills: ['AWS', 'Cloud computing', 'Cloud foundations'], color: '#8a5a1c', h: 90, w: 2.9 },
+  { title: 'AWS Educate: Machine Learning Foundations', at: [306, 263, 45, 198], spine: 'ML Foundations', issuer: 'Amazon Web Services · AWS Educate', date: '2025-04', badge: 'edca8ef7-2c7d-42d7-9c70-4608462df89e', img: '247efe36-9fa6-4209-ad56-0fd522283872/blob',
+    note: 'The fundamentals of machine learning and how models are trained and put to work on AWS.',
+    skills: ['Machine learning', 'AWS'], color: '#6b4a1a', h: 76, w: 2.3 },
+  { title: 'AWS Educate: Introduction to Generative AI', at: [1201, 231, 38, 230], spine: 'Generative AI', issuer: 'Amazon Web Services · AWS Educate', date: '2025-04', badge: '09e4c411-f93a-4f0a-aa57-11396d7d7ae2', img: 'e50c657a-edd9-4c93-b1cf-2b6634b54abf/blob',
+    note: 'How generative AI works, where it helps, and the AWS services built around it.',
+    skills: ['Generative AI', 'AI & ML on AWS', 'AWS'], color: '#4a3a6a', h: 84, w: 2.4 },
+  { title: 'AWS Educate: Machine Learning, DeepRacer', at: [1121, 294, 36, 167], spine: 'AWS DeepRacer', issuer: 'Amazon Web Services · AWS Educate', date: '2025-04', badge: '467eba20-e8af-4d95-b847-678648ac6cb9', img: '26fffe39-a730-47e5-8278-457de2d59174/image.png',
+    note: 'Reinforcement learning in practice: building and training a model to drive an autonomous race car in the DeepRacer console.',
+    skills: ['Reinforcement learning', 'Machine learning', 'AWS DeepRacer', 'AWS'], color: '#2f4a5a', h: 86, w: 2.6 },
+  { title: 'Introduction to Red Hat OpenShift AI (AI262F)', at: [1157, 514, 62, 245], spine: 'OpenShift AI', issuer: 'Red Hat · Red Hat Academy', date: '2025-07', badge: 'b297ceaa-46d1-469c-83fd-b243cb019afe', img: 'edf8b467-a4db-4726-8a78-32fd43aac13a/blob',
+    note: 'Running AI and ML workloads on Red Hat OpenShift AI, including custom notebook images.',
+    skills: ['OpenShift AI', 'OpenShift', 'AI/ML workloads', 'Custom notebook images', 'Red Hat'], color: '#8c1d1d', h: 92, w: 2.7 },
+  { title: 'Red Hat Application Development I: Programming in Java EE (AD183)', at: [1225, 518, 75, 241], spine: 'Java EE', issuer: 'Red Hat · Red Hat Academy', date: '2025-07', badge: '5527bda1-92cf-41e1-b17d-77b3b2151b62', img: 'b5a8e82a-d2cc-408c-80c4-649f26642a9e/blob',
+    note: 'Building enterprise applications in Java EE through the Red Hat Academy course.',
+    skills: ['Java EE', 'Application development', 'Red Hat'], color: '#5a1414', h: 82, w: 2.8 },
+  { title: 'AI & Python', at: [214, 530, 61, 229], spine: 'AI & Python', issuer: 'DataCamp · Certificates', date: '', badge: '', img: '',
+    note: 'Python for data work and the foundations of artificial intelligence.',
+    skills: ['Python', 'Machine learning'], color: '#3b2a1e', h: 72, w: 2.2 },
+  { title: 'BS Information Technology', at: [792, 621, 211, 54], spine: 'BS Information Technology', issuer: 'Batangas State University · Business Analytics', date: '', badge: '', img: '',
+    note: 'The degree in progress: data, systems and the analytics that tie them together.',
+    skills: ['Business analytics', 'Information systems'], color: '#5b1a2a', h: 98, w: 3.6 }
 ];
 const shelf = $('#shelf');
 const card = $('#book-open');
+const chipsEl = $('#skill-chips');
 let current = -1;
+const when = (ym) => ym ? `Issued ${new Date(`${ym}-01T12:00:00`).toLocaleDateString('en', { month: 'long', year: 'numeric' })}` : '';
 
+// Each certificate is a real book in the photo: the spine is cut from the same
+// image, so it looks identical until it is lifted out of the shelf.
+const SHELF_W = 1376, SHELF_H = 768;
 const books = BOOKS.map((b, i) => {
+  const [x, y, w, h] = b.at;
+  const box = { left: `${(x / SHELF_W) * 100}%`, top: `${(y / SHELF_H) * 100}%`, width: `${(w / SHELF_W) * 100}%`, height: `${(h / SHELF_H) * 100}%` };
+  const slot = el('span', 'slot');                       // the dark gap left behind
+  Object.assign(slot.style, box);
   const btn = document.createElement('button');
   btn.type = 'button';
-  btn.className = 'book';
+  btn.className = `spine${w > h ? ' is-lying' : ''}`;
   btn.setAttribute('role', 'listitem');
   btn.setAttribute('aria-label', `${b.title}, ${b.issuer}`);
   btn.setAttribute('aria-pressed', 'false');
-  btn.style.setProperty('--book', b.color);
-  btn.style.setProperty('--bh', `${b.h}%`);
-  btn.style.setProperty('--bw', `${b.w}rem`);
-  btn.append(el('span', 'book-title', b.title));
+  Object.assign(btn.style, box);
+  btn.dataset.x = x; btn.dataset.y = y;
+  if (b.img) {
+    const seal = el('img', 'book-seal');
+    seal.src = badgeImg(b.img);
+    seal.alt = '';
+    seal.loading = 'lazy';
+    btn.append(seal);
+  }
+  btn.append(el('span', 'spine-tag', b.spine));
   btn.addEventListener('click', () => openBook(i));
-  shelf.append(btn);
+  shelf.append(slot, btn);
   return btn;
 });
+// keep each spine's slice of the photo lined up with the shelf behind it
+function alignSpines() {
+  const W = shelf.clientWidth, H = shelf.clientHeight;
+  if (!W) return;
+  books.forEach(btn => {
+    btn.style.backgroundSize = `${W}px ${H}px`;
+    btn.style.backgroundPosition = `${(-btn.dataset.x / SHELF_W) * W}px ${(-btn.dataset.y / SHELF_H) * H}px`;
+  });
+}
+new ResizeObserver(alignSpines).observe(shelf);
+$('#library').addEventListener('chamber:open', () => { alignSpines(); shelf.classList.remove('is-hinting'); void shelf.offsetWidth; shelf.classList.add('is-hinting'); });
 
 function openBook(i) {
-  if (current === i) { books[i].classList.remove('is-out'); books[i].setAttribute('aria-pressed', 'false'); card.hidden = true; current = -1; return; }
+  if (current === i) {
+    books[i].classList.remove('is-out'); books[i].setAttribute('aria-pressed', 'false');
+    shelf.querySelectorAll('.slot').forEach(sl => sl.classList.remove('is-empty'));
+    card.hidden = true; current = -1; return;
+  }
   books.forEach((b, k) => { b.classList.toggle('is-out', k === i); b.setAttribute('aria-pressed', String(k === i)); });
+  shelf.querySelectorAll('.slot').forEach((sl, k) => sl.classList.toggle('is-empty', k === i));
   current = i;
   const b = BOOKS[i];
   $('#book-issuer').textContent = b.issuer;
   $('#book-title').textContent = b.title;
+  $('#book-date').textContent = when(b.date);
   $('#book-note').textContent = b.note;
+  const img = $('#book-badge');
+  img.hidden = !b.img;
+  if (b.img) { img.src = badgeImg(b.img); img.alt = `${b.title} badge`; }
+  const list = $('#book-skills');
+  list.textContent = '';
+  b.skills.forEach(sk => list.append(el('li', null, sk)));
   const link = $('#book-link');
-  link.hidden = !b.href;
-  if (b.href) link.href = b.href;
+  link.hidden = !b.badge;
+  if (b.badge) link.href = `${CREDLY}/badges/${b.badge}`;
   card.style.setProperty('--book', b.color);
   card.hidden = false;
   card.classList.remove('is-in');
   void card.offsetWidth;
   card.classList.add('is-in');
+}
+
+// The index: every skill across the shelf, most-studied first.
+// Choosing one dims the books that didn't teach it.
+const counts = new Map();
+BOOKS.forEach(b => b.skills.forEach(sk => counts.set(sk, (counts.get(sk) || 0) + 1)));
+let chosen = null;
+const chips = [...counts.entries()]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([sk, n]) => {
+    const c = el('button', 'skill-chip');
+    c.type = 'button';
+    c.setAttribute('aria-pressed', 'false');
+    c.append(el('span', null, sk));
+    if (n > 1) c.append(el('b', null, String(n)));
+    c.addEventListener('click', () => chooseSkill(sk === chosen ? null : sk));
+    c.dataset.skill = sk;
+    chipsEl.append(c);
+    return c;
+  });
+
+function chooseSkill(sk) {
+  chosen = sk;
+  chips.forEach(c => c.setAttribute('aria-pressed', String(c.dataset.skill === sk)));
+  books.forEach((b, i) => b.classList.toggle('is-dim', !!sk && !BOOKS[i].skills.includes(sk)));
 }

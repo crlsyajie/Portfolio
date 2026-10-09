@@ -120,7 +120,7 @@
           </article>
           <article class="note n4" data-from="9.3" data-to="12.1">
             <h3><b>IV</b> Seals and letters</h3>
-            <p>Google UX Design · Google Cybersecurity · Google AI Essentials · AWS Cloud Quest: Cloud Practitioner</p>
+            <p>Nine badges on Credly: Google UX Design, Cybersecurity and AI Essentials · AWS Cloud Quest, Machine Learning and Generative AI · Red Hat OpenShift AI and Java EE</p>
           </article>
           <article class="note n5" data-from="12.2" data-to="15.1">
             <h3><b>V</b> His motto</h3>
@@ -328,16 +328,33 @@
         <div class="chamber-body wrap">
           <div class="chamber-head">
             <h2 id="library-title" tabindex="-1">The <em>library</em></h2>
-            <p>Every certificate is a book I finished. Take one from the shelf to read its cover.</p>
+            <p>Every certificate is a book I finished. The ones on this shelf with a seal are mine, each stamped with its badge from <a href="https://www.credly.com/users/carlos-yajie-fetizanan" target="_blank" rel="noopener">Credly</a>. Take one down to read its cover, or choose a skill below to see which books taught it.</p>
           </div>
           <!-- books are built by js/studio.js from the BOOKS list -->
-          <div class="shelf" id="shelf" role="list" aria-label="Certificates"></div>
+          <!-- the real bookshelf; the books with a badge seal are mine (built by js/studio.js) -->
+          <div class="bookcase-scroll">
+            <div class="shelf bookcase" id="shelf" role="list" aria-label="Certificates"></div>
+          </div>
           <article class="book-open" id="book-open" aria-live="polite" hidden>
-            <p class="kicker" id="book-issuer"></p>
-            <h3 id="book-title"></h3>
-            <p id="book-note"></p>
-            <a id="book-link" class="btn btn-solid" target="_blank" rel="noopener">See the credential</a>
+            <img class="book-badge" id="book-badge" alt="" width="120" height="120" hidden />
+            <div class="book-text">
+              <p class="kicker" id="book-issuer"></p>
+              <h3 id="book-title"></h3>
+              <p class="book-date" id="book-date"></p>
+              <p id="book-note"></p>
+              <ul class="book-skills" id="book-skills" aria-label="Skills"></ul>
+              <a id="book-link" class="btn btn-solid" target="_blank" rel="noopener">Verify on Credly</a>
+            </div>
           </article>
+
+          <!-- every skill the badges cover; choosing one lights up the books that taught it -->
+          <div class="skills-index">
+            <div class="ledger-head">
+              <h3>The index · skills learned</h3>
+              <a href="https://www.credly.com/users/carlos-yajie-fetizanan" target="_blank" rel="noopener">All badges on Credly ↗</a>
+            </div>
+            <div class="skill-chips" id="skill-chips" role="group" aria-label="Filter books by skill"></div>
+          </div>
         </div>
       </div>
     </section>

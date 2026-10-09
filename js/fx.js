@@ -231,51 +231,134 @@ $$('.socials a').forEach(a => {
   a.appendChild(roll);
 });
 
-/* ========== 5. CURSOR ========== */
+/* ========== 5. CURSOR: a quill pen ========== */
+// The nib is the hotspot. Over something you can open, the quill tilts as if to
+// write and a paper tag says what will happen; a click leaves a drop of ink,
+// and holding the button down draws a line of ink.
 if (finePointer && !reduceMotion) {
-  const dot = Object.assign(document.createElement('div'), { className: 'cursor-dot' });
-  const ring = Object.assign(document.createElement('div'), { className: 'cursor-ring' });
-  ring.innerHTML = '<div class="cursor-ring-inner"><span class="cursor-label"></span></div>';
-  dot.setAttribute('aria-hidden', 'true');
-  ring.setAttribute('aria-hidden', 'true');
-  document.body.append(dot, ring);
-  const label = $('.cursor-label', ring);
+  const quill = document.createElement('div');
+  quill.className = 'quill';
+  quill.setAttribute('aria-hidden', 'true');
+  quill.innerHTML = `<svg viewBox="0 0 40 40" class="quill-pen">
+      <path class="vane" d="M11 27 C 12 16, 22 6, 38 1 C 35 12, 25 23, 11 27 Z" />
+      <path class="barbs" d="M16 21 L 23 19 M19 17 L 27 14 M23 12 L 31 9 M14 24 L 19 23.5" />
+      <path class="shaft" d="M4 36 C 14 26, 24 14, 37 2" />
+      <path class="nib" d="M2 38 L 5.5 31.5 L 8.5 34.5 Z" />
+    </svg>`;
+  const label = document.createElement('span');
+  label.className = 'quill-tag';
+  label.setAttribute('aria-hidden', 'true');
+  document.body.append(quill, label);
 
   const pos = { x: innerWidth / 2, y: innerHeight / 2 };
-  const ringPos = { ...pos };
+  const tagPos = { ...pos };
   let shown = false;
 
   window.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse') return;
     pos.x = e.clientX; pos.y = e.clientY;
-    if (!shown) { shown = true; ringPos.x = pos.x; ringPos.y = pos.y; root.classList.add('has-cursor'); }
+    if (!shown) { shown = true; tagPos.x = pos.x; tagPos.y = pos.y; root.classList.add('has-cursor'); }
     root.classList.remove('cursor-out');
-    dot.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
+    quill.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`;
   }, { passive: true });
-  document.addEventListener('pointerleave', () => root.classList.add('cursor-out'));
   document.documentElement.addEventListener('mouseleave', () => root.classList.add('cursor-out'));
-  window.addEventListener('pointerdown', () => ring.classList.add('is-down'));
-  window.addEventListener('pointerup', () => ring.classList.remove('is-down'));
 
-  // What the ring turns into depends on what's underneath.
+  // a drop of ink where you click, soaking into the page
+  window.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    quill.classList.add('is-down');
+    const ink = document.createElement('span');
+    ink.className = 'ink-drop';
+    ink.setAttribute('aria-hidden', 'true');
+    ink.style.left = `${e.clientX}px`;
+    ink.style.top = `${e.clientY}px`;
+    ink.style.setProperty('--r', `${Math.round(Math.random() * 360)}deg`);
+    document.body.append(ink);
+    setTimeout(() => ink.remove(), 1100);
+  });
+  window.addEventListener('pointerup', () => quill.classList.remove('is-down'));
+
+  // Hold the button and the quill writes: a line of ink that follows the nib,
+  // thick when slow and thin when fast like a real pen, then soaks away.
+  const inkCanvas = document.createElement('canvas');
+  inkCanvas.className = 'ink-layer';
+  inkCanvas.setAttribute('aria-hidden', 'true');
+  document.body.append(inkCanvas);
+  const ictx = inkCanvas.getContext('2d');
+  const LIFE = 1800;                                    // ms a stroke stays on the page
+  let dpr = 1;
+  const sizeInk = () => {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    inkCanvas.width = innerWidth * dpr; inkCanvas.height = innerHeight * dpr;
+  };
+  sizeInk();
+  window.addEventListener('resize', sizeInk);
+  let segs = [];                                         // { x0, y0, x1, y1, w, t }
+  let pen = null;                                        // last point while the button is held
+  let inkRaf = null;
+  const inkColour = () => (root.dataset.theme === 'dark' ? '240, 205, 150' : '42, 24, 12');
+
+  function drawInk(now) {
+    segs = segs.filter(sg => now - sg.t < LIFE);
+    ictx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ictx.clearRect(0, 0, innerWidth, innerHeight);
+    ictx.lineCap = 'round';
+    const rgb = inkColour();
+    segs.forEach(sg => {
+      const age = (now - sg.t) / LIFE;
+      ictx.strokeStyle = `rgba(${rgb}, ${(0.85 * (1 - age * age)).toFixed(3)})`;
+      ictx.lineWidth = sg.w * (1 - age * 0.35);
+      ictx.beginPath();
+      ictx.moveTo(sg.x0, sg.y0);
+      ictx.lineTo(sg.x1, sg.y1);
+      ictx.stroke();
+    });
+    inkRaf = segs.length || pen ? requestAnimationFrame(drawInk) : null;
+  }
+  const wakeInk = () => { if (!inkRaf) inkRaf = requestAnimationFrame(drawInk); };
+
+  window.addEventListener('pointerdown', (e) => {
+    if (e.pointerType !== 'mouse' || e.button !== 0) return;
+    if (e.target.closest('input, textarea, select, [contenteditable]')) return;
+    pen = { x: e.clientX, y: e.clientY, w: 3.2 };
+    root.classList.add('is-inking');                    // no text selection while writing
+    wakeInk();
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!pen || e.pointerType !== 'mouse') return;
+    const dx = e.clientX - pen.x, dy = e.clientY - pen.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 1.5) return;
+    // nib width eases toward a target set by speed, so strokes swell and taper
+    const target = Math.max(1, Math.min(4.6, 5 - dist * 0.12));
+    const w = pen.w + (target - pen.w) * 0.35;
+    segs.push({ x0: pen.x, y0: pen.y, x1: e.clientX, y1: e.clientY, w, t: performance.now() });
+    pen = { x: e.clientX, y: e.clientY, w };
+  }, { passive: true });
+  const lift = () => { pen = null; root.classList.remove('is-inking'); };
+  window.addEventListener('pointerup', lift);
+  window.addEventListener('pointercancel', lift);
+  window.addEventListener('blur', lift);
+
   document.addEventListener('pointerover', (e) => {
     const t = e.target;
-    const text = t.closest('input:not([type="radio"]), textarea');
-    root.classList.toggle('cursor-text', !!text);
+    root.classList.toggle('cursor-text', !!t.closest('input:not([type="radio"]), textarea'));
     let tag = '';
     if (t.closest('.rack-canvas')) tag = 'View';
     else if (t.closest('.hotspot')) tag = 'Enter';
-    else if (t.closest('.project a')) tag = 'Open';
-    const link = !tag && t.closest('a, button, label, [role="button"], .marquee-item');
+    else if (t.closest('.spine')) tag = 'Take down';
+    else if (t.closest('.project a, .repo a')) tag = 'Open';
+    const link = t.closest('a, button, label, [role="button"]');
     label.textContent = tag;
-    ring.classList.toggle('has-label', !!tag);
-    ring.classList.toggle('is-link', !!link);
+    label.classList.toggle('is-on', !!tag);
+    quill.classList.toggle('is-ready', !!link || !!tag);
   });
 
+  // the tag drifts after the pen like a trailing note
   (function follow() {
-    ringPos.x += (pos.x - ringPos.x) * 0.18;
-    ringPos.y += (pos.y - ringPos.y) * 0.18;
-    ring.style.transform = `translate3d(${ringPos.x}px, ${ringPos.y}px, 0)`;
+    tagPos.x += (pos.x - tagPos.x) * 0.2;
+    tagPos.y += (pos.y - tagPos.y) * 0.2;
+    label.style.transform = `translate3d(${tagPos.x + 26}px, ${tagPos.y + 14}px, 0)`;
     requestAnimationFrame(follow);
   })();
 }

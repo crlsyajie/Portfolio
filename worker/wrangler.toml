@@ -1,0 +1,9 @@
+name = "ask-yajie"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Lets src/index.js import knowledge.md as plain text.
+[[rules]]
+type = "Text"
+globs = ["**/*.md"]

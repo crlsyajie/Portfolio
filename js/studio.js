@@ -7,6 +7,7 @@
    3. The ledger: every repository, read live from GitHub
    4. The library: certificates as books on a shelf
    5. The wall: recent LinkedIn posts pinned up as studies
+   6. The brush jar: a folder for each live website
    ============================================ */
 const $ = (sel, ctx = document) => ctx.querySelector(sel);
 const $$ = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
@@ -15,7 +16,7 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
 const studio = $('#studio');
 const room = $('#room');
 const roomScroll = $('#room-scroll');
-const CHAMBERS = ['art', 'work', 'library', 'notes'];
+const CHAMBERS = ['art', 'work', 'library', 'notes', 'sites'];
 
 /* ========== 1. CHAMBERS ========== */
 let openName = null;
@@ -390,3 +391,75 @@ function closeLetter() {
   if (was >= 0) pinned[was].focus({ preventScroll: false });
 }
 $('#letter-close').addEventListener('click', closeLetter);
+
+/* ========== 6. THE BRUSH JAR ========== */
+// One folder per live website. Selecting a folder opens the site; hovering it
+// lifts the page inside to show a small live preview.
+// To add a site: add a line here (repo is the GitHub repository name).
+const SITES = [
+  { name: 'Formula 1 Forecast Simulator', url: 'https://crlsyajie.github.io/F1-Forecast-Sim/', repo: 'F1-Forecast-Sim',
+    note: 'XGBoost race forecasts replayed as a live race on real F1 circuit maps.', tags: ['JavaScript', 'XGBoost', 'Data visualisation'], featured: true },
+  { name: 'BaraKollect', url: 'https://barakollect.vercel.app/', repo: 'barakollect',
+    note: 'Capstone: computer vision and analytics for studying the morphology of Liberica coffee beans.', tags: ['React', 'TypeScript', 'Computer vision'] },
+  { name: 'The Campus Chronicles', url: 'https://crlsyajie.github.io/tcc/', repo: 'tcc',
+    note: 'Landing page for a gamified, pixel-art school map adventure.', tags: ['HTML', 'CSS', 'UI design'] },
+  { name: 'Climate Change', url: 'https://crlsyajie.github.io/CLIMATE/', repo: 'CLIMATE',
+    note: 'A landing page about climate change and what people can do about it.', tags: ['HTML', 'CSS'] },
+  { name: 'Flip Countdown', url: 'https://crlsyajie.github.io/flip_countdown/', repo: 'flip_countdown',
+    note: 'A flip-clock countdown timer.', tags: ['HTML', 'JavaScript'] },
+  { name: 'Family Feud Game', url: 'https://crlsyajie.github.io/Family_feud_style_game/', repo: 'Family_feud_style_game',
+    note: 'A Family Feud-style party game that runs in the browser.', tags: ['HTML', 'JavaScript'] }
+];
+const FOLDER_TONES = ['#d9c08f', '#c9a874', '#d4b98a', '#bfa06c', '#ccb180', '#c4a577'];
+const foldersEl = $('#folders');
+const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+const host = (u) => new URL(u).host.replace(/^www\./, '') + new URL(u).pathname.replace(/\/$/, '');
+
+SITES.forEach((site, i) => {
+  const item = el('div', `folder-item${site.featured ? ' is-featured' : ''}`);
+  item.setAttribute('role', 'listitem');
+  item.style.setProperty('--tone', FOLDER_TONES[i % FOLDER_TONES.length]);
+  item.style.setProperty('--tilt', `${[-1.2, 0.9, -0.6, 1.3, -1, 0.7][i % 6]}deg`);
+
+  const a = el('a', 'folder');
+  a.href = site.url;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.setAttribute('aria-label', `${site.name}: open the live site`);
+  a.append(el('span', 'folder-tab', site.featured ? 'Featured' : `No. ${i + 1}`));
+  a.append(el('span', 'folder-back'));
+  const paper = el('span', 'folder-paper');
+  paper.append(el('span', 'folder-url', host(site.url)));
+  const peek = el('span', 'folder-peek');
+  paper.append(peek);
+  a.append(paper);
+  const front = el('span', 'folder-front');
+  front.append(el('span', 'folder-title', site.name), el('span', 'folder-note', site.note));
+  const tags = el('span', 'folder-tags');
+  site.tags.forEach(t => tags.append(el('span', null, t)));
+  front.append(tags, el('span', 'folder-go', 'Visit the live site ↗'));
+  a.append(front);
+
+  // the live preview loads the first time the folder is opened
+  if (canHover) {
+    const load = () => {
+      if (peek.firstChild) return;
+      const f = document.createElement('iframe');
+      f.src = site.url;
+      f.title = `Preview of ${site.name}`;
+      f.tabIndex = -1;
+      f.setAttribute('aria-hidden', 'true');
+      f.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      peek.append(f);
+    };
+    a.addEventListener('pointerenter', load);
+    a.addEventListener('focus', load);
+  }
+
+  const code = el('a', 'folder-code', 'Source on GitHub');
+  code.href = `https://github.com/crlsyajie/${site.repo}`;
+  code.target = '_blank';
+  code.rel = 'noopener';
+  item.append(a, code);
+  foldersEl.append(item);
+});

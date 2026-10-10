@@ -992,6 +992,84 @@ main, .site-foot { position: relative; z-index: 1; }
 .letter-frame { width: 100%; max-width: 504px; }
 .letter-frame iframe { display: block; width: 100%; height: 640px; border: 0; background: #fff; }
 
+/* the brush jar: a folder for each live website */
+.folders { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(17rem, 100%), 1fr)); gap: 3.5rem 2.25rem; padding-top: 2.5rem; }
+.folder-item { display: flex; flex-direction: column; gap: 0.7rem; rotate: var(--tilt, 0deg); transition: rotate 0.6s var(--ease); }
+.folder-item.is-featured { grid-column: span 2; }
+.folder-item:hover, .folder-item:focus-within { rotate: 0deg; }
+.folder {
+  position: relative;
+  display: block;
+  aspect-ratio: 5 / 4;
+  color: #2a2018;
+  text-decoration: none;
+  perspective: 900px;
+}
+.folder-item.is-featured .folder { aspect-ratio: 16 / 9; }
+/* back of the folder, with its tab */
+.folder-back { position: absolute; inset: 1.4rem 0 0; border-radius: 4px 6px 4px 4px; background: color-mix(in srgb, var(--tone) 82%, #3a2410); box-shadow: 0 18px 30px rgba(40, 25, 10, 0.25); }
+.folder-tab {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0.9rem;
+  height: 1.7rem;
+  padding: 0.3rem 1rem 0;
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--tone) 82%, #3a2410);
+  font-family: var(--caps);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #f6ecda;
+}
+/* the page inside, which lifts out to show the live site */
+.folder-paper {
+  position: absolute;
+  inset: 2.2rem 0.8rem 0.6rem;
+  overflow: hidden;
+  background: #f7f0e2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.7s var(--ease);
+}
+.folder-url { position: absolute; z-index: 1; top: 0; left: 0; right: 0; padding: 0.25rem 0.6rem; font-family: var(--caps); font-size: 0.6rem; letter-spacing: 0.12em; color: #6e6050; background: #efe5d2; border-bottom: 1px solid rgba(110, 80, 40, 0.2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.folder-peek { position: absolute; inset: 1.35rem 0 0; overflow: hidden; background: repeating-linear-gradient(0deg, rgba(110, 80, 40, 0.08) 0 1px, transparent 1px 1.4rem), #f7f0e2; }
+/* the site is drawn at desktop width and scaled down to fit the page */
+.folder-peek iframe { position: absolute; top: 0; left: 0; width: 400%; height: 400%; border: 0; transform: scale(0.25); transform-origin: 0 0; pointer-events: none; background: #fff; }
+/* the front flap */
+.folder-front {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 64%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem 1.15rem 1rem;
+  border-radius: 3px 3px 4px 4px;
+  background:
+    radial-gradient(120% 80% at 0% 100%, rgba(120, 80, 30, 0.18), transparent 60%),
+    linear-gradient(180deg, color-mix(in srgb, var(--tone) 90%, #fff), var(--tone));
+  box-shadow: 0 -2px 6px rgba(60, 35, 10, 0.18);
+  transform-origin: bottom center;
+  transition: transform 0.7s var(--ease);
+}
+.folder-item.is-featured .folder-front { height: 52%; }
+.folder-title { font-family: var(--display); font-size: 1.45rem; line-height: 1.1; }
+.folder-item.is-featured .folder-title { font-size: clamp(1.6rem, 2.6vw, 2.2rem); }
+.folder-note { font-family: var(--display); font-style: italic; font-size: 1rem; line-height: 1.35; color: #4a3a28; }
+.folder-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: auto; }
+.folder-tags span { padding: 0.1rem 0.5rem; border: 1px solid rgba(60, 35, 10, 0.3); border-radius: 999px; font-size: 0.78rem; color: #4a3a28; }
+.folder-go { position: absolute; right: 1.1rem; bottom: 1rem; font-family: var(--caps); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: #8a3418; opacity: 0; transition: opacity 0.4s ease; }
+/* opening the folder: the flap tips forward and the page rises */
+.folder:hover .folder-front, .folder:focus-visible .folder-front { transform: rotateX(-22deg) translateY(6px); }
+.folder:hover .folder-paper, .folder:focus-visible .folder-paper { transform: translateY(-1.6rem); }
+.folder:hover .folder-go, .folder:focus-visible .folder-go { opacity: 1; }
+.folder-code { align-self: flex-start; padding-left: 0.2rem; font-style: italic; color: var(--muted); text-underline-offset: 0.25em; text-decoration-thickness: 1px; }
+.folder-code:hover { color: var(--accent); }
+
 .to-library { margin-top: 1.25rem; color: var(--muted); }
 .link-btn { padding: 0; border: none; background: none; color: var(--accent); font: inherit; font-style: italic; text-decoration: underline; text-underline-offset: 0.25em; text-decoration-thickness: 1px; cursor: pointer; }
 
@@ -1328,6 +1406,9 @@ a:hover > .roll > span, a:focus-visible > .roll > span, a:hover > .roll::after, 
   .book-open { margin: 2.5rem 0 0; padding: 1.5rem 1.4rem 1.6rem; flex-direction: column; gap: 1rem; }
   .book-badge { width: 5.5rem; height: 5.5rem; }
   .pinboard { padding: 2.5rem 1.25rem; gap: 3rem; }
+  .folder-item.is-featured { grid-column: auto; }
+  .folder-item.is-featured .folder { aspect-ratio: 5 / 4; }
+  .folder-item.is-featured .folder-front { height: 64%; }
   .letter { padding: 1rem 0.75rem 1.4rem; }
 
   .about-grid { grid-template-columns: 1fr; gap: 3rem; }

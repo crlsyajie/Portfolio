@@ -144,7 +144,7 @@
          the code, the bookshelf the certificates, the sketches on the wall the latest
          LinkedIn posts, and the window turns day to night.
          Hotspot positions are percentages of assets/studio/room.jpg. js/studio.js
-         opens each "chamber" (also reachable as #work, #art, #library and #notes). -->
+         opens each "chamber" (also reachable as #work, #art, #library, #notes and #sites). -->
     <section id="studio" class="studio-scene" aria-labelledby="studio-title">
       <div class="studio-head wrap">
         <div>
@@ -175,6 +175,10 @@
             <span class="hs-pin" aria-hidden="true"></span>
             <span class="hs-label"><b>The wall</b> Notes &amp; recent posts</span>
           </button>
+          <button type="button" class="hotspot" data-chamber="sites" style="--x: 24.5%; --y: 66%; --w: 8%; --h: 26%;">
+            <span class="hs-pin" aria-hidden="true"></span>
+            <span class="hs-label"><b>The brush jar</b> Live websites</span>
+          </button>
           <button type="button" class="hotspot hs-window" data-theme-window style="--x: 17.6%; --y: 29%; --w: 9%; --h: 50%;">
             <span class="hs-pin" aria-hidden="true"></span>
             <span class="hs-label"><b>The window</b> <span class="hs-daynight">Let night fall</span></span>
@@ -187,6 +191,7 @@
         <li><button type="button" data-chamber="work"><b>II</b> The flying machine <span>Code &amp; repositories</span></button></li>
         <li><button type="button" data-chamber="library"><b>III</b> The bookshelf <span>Certificates &amp; study</span></button></li>
         <li><button type="button" data-chamber="notes"><b>IV</b> The wall <span>Notes &amp; recent posts</span></button></li>
+        <li><button type="button" data-chamber="sites"><b>V</b> The brush jar <span>Live websites</span></button></li>
       </ul>
 
       <!-- ===== Chamber: the canvas → paintings and drawings, stood in a rack ===== -->
@@ -385,6 +390,22 @@
             <div class="letter-frame" id="letter-frame"></div>
             <a class="btn btn-solid" id="letter-link" target="_blank" rel="noopener">Open on LinkedIn</a>
           </article>
+        </div>
+      </div>
+
+      <!-- ===== Chamber: the brush jar → a folder of live websites ===== -->
+      <div class="chamber" id="sites" role="dialog" aria-modal="true" aria-labelledby="sites-title" hidden>
+        <div class="chamber-bar">
+          <button type="button" class="chamber-back" data-close-chamber>← Back to the studio</button>
+          <p class="kicker">The brush jar</p>
+        </div>
+        <div class="chamber-body wrap">
+          <div class="chamber-head">
+            <h2 id="sites-title" tabindex="-1">Works you can <em>visit</em></h2>
+            <p>Each brush in the jar finished a piece that's live on the web. Every folder holds one: hover to peek inside, select it to open the site.</p>
+          </div>
+          <!-- built by js/studio.js from the SITES list -->
+          <div class="folders" id="folders" role="list" aria-label="Live websites"></div>
         </div>
       </div>
     </section>

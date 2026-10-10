@@ -310,6 +310,8 @@ const topics = [
     r: () => ({ text: 'Python projects:', list: projectList('python'), actions: [{ label: 'Show Python projects', run: () => showWork('python') }] }) },
   { w: ['contact', 'email', 'reach', 'hire', 'phone', 'number', 'call', 'message', 'available', 'freelance', 'commission', 'rate', 'rates', 'price', 'pricing', 'quote', 'cost'], k: 1.4,
     r: () => ({ text: `${PROFILE.hire} You can email Carlos at ${EMAIL} or call him on +63 956 576 7967.`, actions: [contactAction, copyAction] }) },
+  { w: ['live', 'demo', 'demos', 'website', 'websites', 'site', 'sites', 'simulator', 'f1', 'formula', 'deployed', 'try'], k: 1.6,
+    r: () => ({ text: "Carlos's live websites are in the brush jar in the studio, led by the Formula 1 Forecast Simulator: XGBoost race forecasts replayed on real F1 circuit maps.", list: [{ label: 'Formula 1 Forecast Simulator', href: 'https://crlsyajie.github.io/F1-Forecast-Sim/' }], actions: [{ label: 'Open the brush jar', run: () => openRoom('sites') }] }) },
   { w: ['post', 'posts', 'news', 'latest', 'recent', 'event', 'events', 'devfest', 'graduate', 'graduated', 'graduation', 'cum laude', 'activity', 'updates'], k: 1.5,
     r: () => ({ text: 'Carlos pins his recent LinkedIn posts to the wall in the studio: Google I/O Extended Manila 2026, graduating Cum Laude, the BaraKollect showcase and DevFest Manila 2025.', actions: [{ label: 'Show the wall', run: () => openRoom('notes') }] }) },
   { w: ['instagram', 'facebook', 'linkedin', 'social', 'socials', 'follow', 'ig', 'fb'], k: 1.4,

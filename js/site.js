@@ -245,6 +245,11 @@ const askInput = $('#ask-input');
 const askSend = $('button', askForm);
 const askOpeners = $$('[data-open-ask]');
 let kb = null;
+// The AI assistant (worker/ in this repo). Paste the URL from `npx wrangler deploy` here.
+// While it is empty, the panel answers from the keyword topics below only.
+// On localhost you can try a local Worker with ?agent=http://localhost:8787
+const AGENT_URL = (location.hostname === 'localhost' && new URLSearchParams(location.search).get('agent')) || '';
+const chat = []; // this conversation, sent to the assistant for context
 
 fetch('lib/chatbot/knowledge-base.json').then(r => (r.ok ? r.json() : null)).then(d => { kb = d; }).catch(() => {});
 const kbText = (cat) => (kb ? kb.knowledge_base.filter(k => k.category === cat).map(k => k.content).join(' ') : '');
@@ -349,7 +354,7 @@ function answer(q) {
     });
     if (top) return { text: top.content };
   }
-  return { text: "That isn't in Carlos's portfolio yet, so I can't answer it accurately. You can ask him directly:", actions: [contactAction, copyAction] };
+  return { text: "That isn't in Carlos's portfolio yet, so I can't answer it accurately. You can ask him directly:", actions: [contactAction, copyAction], fallback: true };
 }
 
 function addMsg(role, c) {
@@ -383,14 +388,32 @@ function addMsg(role, c) {
   return m;
 }
 
-function askQ(q) {
+// Keyword topics answer first (instant, with buttons). Anything they can't answer goes to the AI assistant.
+async function askAgent() {
+  const r = await fetch(AGENT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chat }) });
+  if (!r.ok) throw new Error(`Assistant returned ${r.status}`);
+  const { text } = await r.json();
+  if (!text) throw new Error('Empty answer');
+  return { text, actions: [contactAction] };
+}
+
+async function askQ(q) {
   q = q.trim();
   if (!q) return;
   addMsg('user', q);
+  chat.push({ role: 'user', content: q });
   askInput.value = ''; askSend.disabled = true;
   const t = addMsg('bot', '');
   t.innerHTML = '<span class="typing" aria-label="Typing"><i></i><i></i><i></i></span>';
-  setTimeout(() => { t.remove(); addMsg('bot', answer(q)); }, reduceMotion ? 0 : 380);
+  let a = answer(q);
+  if (a.fallback && AGENT_URL) {
+    try { a = await askAgent(); } catch (e) { console.warn(e); }
+  } else {
+    await new Promise(res => setTimeout(res, reduceMotion ? 0 : 380));
+  }
+  t.remove();
+  addMsg('bot', a);
+  chat.push({ role: 'assistant', content: a.text || (a.list || []).map(it => it.label).join(', ') || '…' });
 }
 
 ['What does he do?', 'ML projects', 'Show me his art', 'Certifications', 'How do I hire him?'].forEach(q => {

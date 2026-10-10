@@ -1,0 +1,17 @@
+{
+  "info": {
+    "name": "Carlos Yajie Fetizanan",
+    "goes_by": "Yajie",
+    "socials": {
+      "linkedin": "https://www.linkedin.com/in/carlos-yajie-fetizanan-b320a1286/",
+      "github": "https://github.com/crlsyajie",
+      "instagram": "https://www.instagram.com/crls_brook/",
+      "facebook": "https://www.facebook.com/share/18nwGKjCYv/?mibextid=wwXIfr"
+    }
+  },
+  "knowledge_base": [
+    { "category": "Certifications", "content": "Yajie holds nine badges on Credly: Google UX Design, Google Cybersecurity and Google AI Essentials; AWS Cloud Quest: Cloud Practitioner, plus AWS Educate Machine Learning Foundations, Introduction to Generative AI and Machine Learning (DeepRacer); and Red Hat Introduction to OpenShift AI and Application Development I: Java EE. He also completed DataCamp's AI & Python." },
+    { "category": "Skills", "content": "Yajie works across AI and prompt engineering, machine learning, data science, UI/UX design, web development, graphic design and video editing. He codes in Python and JavaScript, and designs in Figma, Adobe XD, Photoshop, Illustrator and Premiere Pro." },
+    { "category": "Services", "content": "Yajie can help with machine learning and AI tools, data science and analytics, UI/UX design, web development, graphic design and brand visuals, and video editing. The contact form is the quickest way to start a project." }
+  ]
+}

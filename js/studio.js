@@ -399,6 +399,8 @@ $('#letter-close').addEventListener('click', closeLetter);
 const SITES = [
   { name: 'Formula 1 Forecast Simulator', url: 'https://crlsyajie.github.io/F1-Forecast-Sim/', repo: 'F1-Forecast-Sim',
     note: 'XGBoost race forecasts replayed as a live race on real F1 circuit maps.', tags: ['JavaScript', 'XGBoost', 'Data visualisation'], featured: true },
+  { name: 'CYF Moonbase', url: 'https://crlsyajie.github.io/CYF-Moonbase/', repo: 'CYF-Moonbase',
+    note: 'A live view of my dev work as a lunar base: every GitHub push and Claude Code run sends a cargo crate between its stations.', tags: ['HTML', 'JavaScript', 'Live data'] },
   { name: 'BaraKollect', url: 'https://barakollect.vercel.app/', repo: 'barakollect',
     note: 'Capstone: computer vision and analytics for studying the morphology of Liberica coffee beans.', tags: ['React', 'TypeScript', 'Computer vision'] },
   { name: 'The Campus Chronicles', url: 'https://crlsyajie.github.io/tcc/', repo: 'tcc',
